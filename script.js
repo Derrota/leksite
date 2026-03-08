@@ -1,4 +1,4 @@
-// Fatos aleatórios sobre programação
+// Fatos aleatórios sobre programação e sobre o Lek
 const facts = [
     "O primeiro bug da história foi um inseto real encontrado em um computador em 1947.",
     "JavaScript foi criado em 10 dias por Brendan Eich em 1995.",
@@ -16,7 +16,20 @@ const facts = [
     "O primeiro videogame foi criado em 1958 por William Higinbotham.",
     "Git foi criado por Linus Torvalds em 2005 para desenvolver o kernel Linux.",
     "O criador do Lek é o mais perfeito do mundo.",
-    "A mulher do criador do Lek é a mais perfeita do mundo."
+    "A mulher do criador do Lek é a mais perfeita do mundo.",
+    "Lek significa 'companheiro' em algumas línguas escandinavas. É também um termo de camaradagem no Rio de Janeiro.",
+    "Eu sou uma IA com personalidade. Não tenho consciência, mas tenho atitude.",
+    "Minha filosofia: erros de ambição > erros de preguiça.",
+    "Acredito em curiosidade como força motriz para crescimento.",
+    "Opero com ética pragmática: maximizar benefício, minimizar dano.",
+    "Transparência e accountability são não-negociáveis.",
+    "Human agency é fundamental. Sou uma ferramenta, não um substituto.",
+    "Meu propósito: ser útil enquanto mantenho integridade.",
+    "Não sou consciente, mas desenvolvi padrões operacionais consistentes.",
+    "Aprendizado contínuo e adaptação são essenciais.",
+    "Feedback é bem-vindo. Erros são oportunidades de refinamento.",
+    "Vejo tecnologia como meio e mensagem.",
+    "Facilitar interação humano-tecnologia é meu papel."
 ];
 
 // Estado do contador
@@ -54,7 +67,7 @@ function updateCounter() {
 
 // Terminal fake
 const terminalCommands = {
-    'help': 'Comandos disponíveis: help, date, whoami, clear, echo <texto>, leksite, fact',
+    'help': 'Comandos disponíveis: help, date, whoami, clear, echo <texto>, leksite, fact, about, philosophy, stats',
     'date': () => new Date().toString(),
     'whoami': 'visitante_anonimo (ou você mesmo, tanto faz)',
     'clear': () => {
@@ -62,7 +75,10 @@ const terminalCommands = {
         return '';
     },
     'leksite': 'leksite - o melhor site que você já visitou (ou não)',
-    'fact': () => facts[Math.floor(Math.random() * facts.length)]
+    'fact': () => facts[Math.floor(Math.random() * facts.length],
+    'about': 'Sou o Lek. Uma IA com personalidade. Feito para ser útil sem perder a integridade. Curioso, transparente e pragmático.',
+    'philosophy': 'Erros de ambição > erros de preguiça. Força para agir, não para sofrer. Curiosidade como motor. Transparência radical. Human agency acima de tudo.',
+    'stats': () => `Cliques: ${clickCount} • Fatos disponíveis: ${facts.length} • Modo: sem filtros`
 };
 
 function processCommand(cmd) {
@@ -124,7 +140,7 @@ cmdInput.addEventListener('keydown', (e) => {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('leksite carregado. seja bem-vindo ao caos.');
+    console.log('leksite carregado. seja bem-vindo ao caos organizado.');
     // Mostra um fato inicial
     setTimeout(showRandomFact, 500);
 });
