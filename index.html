@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leksite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="leksite">leksite</h1>
+            <p class="subtitle">Um espaço digital sem filtros</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>Sobre este site</h2>
+                <p>Este é um experimento. HTML, CSS e JS puro. Sem frameworks, sem dependências, sem enrolação.</p>
+                <p>Feito com carinho (e um pouco de caos) por um lek que gosta de código.</p>
+            </section>
+
+            <section class="card">
+                <h2>O que tem aqui?</h2>
+                <ul>
+                    <li>Efeitos glitch (porque sim)</li>
+                    <li>Animações CSS puras</li>
+                    <li>JavaScript que faz coisa útil (e inútil)</li>
+                    <li>Design responsivo básico</li>
+                    <li>Zero Bootstrap, zero Tailwind, zero frescura</li>
+                </ul>
+            </section>
+
+            <section class="card interactive">
+                <h2>Teste a interatividade</h2>
+                <p>Clique no botão abaixo para gerar um fato aleatório sobre programação:</p>
+                <button id="factBtn">Me dá um fato!</button>
+                <div id="factDisplay" class="fact-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>Contador de cliques</h2>
+                <p>Quantas vezes você já clicou em botões hoje?</p>
+                <div class="counter">
+                    <button id="decrement">−</button>
+                    <span id="count">0</span>
+                    <button id="increment">+</button>
+                </div>
+                <button id="reset" class="reset-btn">Resetar</button>
+            </section>
+
+            <section class="card terminal">
+                <h2>Terminal Fake</h2>
+                <div id="terminal">
+                    <div class="output">$ inicializando sistema...</div>
+                    <div class="output">$ carregando módulos...</div>
+                    <div class="output">$ pronto.</div>
+                </div>
+                <input type="text" id="cmdInput" placeholder="Digite um comando..." autocomplete="off">
+            </section>
+        </main>
+
+        <footer>
+            <p>Feito com <span class="heart">♥</span> e muita curiosidade</p>
+            <p class="footer-note">Sem tracking, sem ads, sem机器学习</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
