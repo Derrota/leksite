@@ -1,4 +1,4 @@
-/* Reset básico */
+/* Reset básico - sem frescura */
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Courier New', monospace;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    background: #0a0a0a;
     color: #e0e0e0;
     line-height: 1.6;
     min-height: 100vh;
@@ -19,11 +19,11 @@ body {
     margin: 0 auto;
 }
 
-/* Header com efeito glitch */
+/* Header com efeito glitch - porque sim */
 header {
     text-align: center;
-    padding: 60px 20px;
-    margin-bottom: 40px;
+    padding: 40px 20px;
+    margin-bottom: 30px;
 }
 
 .glitch {
@@ -45,38 +45,40 @@ header {
 }
 
 .subtitle {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #888;
     margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-/* Cards */
+/* Cards - simples e funcionais */
 .card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 25px;
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
 }
 
 .card h2 {
     color: #00ffff;
     margin-bottom: 15px;
-    font-size: 1.5rem;
-    border-bottom: 2px solid #ff00ff;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #333;
     padding-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .card p, .card li {
     color: #ccc;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .card ul {
@@ -85,108 +87,116 @@ header {
 }
 
 .card li {
-    padding-left: 20px;
+    padding-left: 15px;
     position: relative;
 }
 
 .card li::before {
-    content: "▸";
+    content: "►";
     position: absolute;
     left: 0;
     color: #ff00ff;
+    font-size: 0.8rem;
 }
 
-/* Botões */
+/* Botões - diretos */
 button {
-    background: linear-gradient(45deg, #ff00ff, #00ffff);
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    font-size: 1rem;
-    border-radius: 6px;
+    background: #222;
+    border: 1px solid #00ffff;
+    color: #00ffff;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border-radius: 0;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(255, 0, 255, 0.4);
+    background: #00ffff;
+    color: #000;
 }
 
 button:active {
-    transform: scale(0.98);
+    background: #00aaaa;
 }
 
 #factBtn {
     margin-top: 15px;
     display: block;
+    width: 100%;
 }
 
 .fact-box {
     margin-top: 20px;
     padding: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
+    background: #000;
+    border: 1px solid #333;
+    border-left: 4px solid #ff00ff;
     min-height: 60px;
-    border-left: 4px solid #00ffff;
+    font-size: 0.95rem;
 }
 
-/* Contador */
+/* Contador - funcional */
 .counter {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     margin: 20px 0;
     justify-content: center;
 }
 
 .counter button {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
     padding: 0;
 }
 
 #count {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #00ffff;
-    min-width: 60px;
+    min-width: 50px;
     text-align: center;
 }
 
 .reset-btn {
-    background: #ff4444;
+    background: #330000;
+    border-color: #ff4444;
+    color: #ff4444;
     margin-top: 10px;
 }
 
 .reset-btn:hover {
-    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+    background: #ff4444;
+    color: #000;
 }
 
-/* Terminal fake */
+/* Terminal fake - estilo hacker */
 .terminal {
     background: #000;
     border: 1px solid #00ff00;
-    border-radius: 8px;
-    padding: 20px;
-    font-family: 'Courier New', monospace;
+    border-radius: 0;
+    padding: 0;
 }
 
 #terminal {
     background: #0a0a0a;
     padding: 15px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    min-height: 120px;
-    max-height: 200px;
+    margin-bottom: 0;
+    min-height: 150px;
+    max-height: 250px;
     overflow-y: auto;
+    font-size: 0.9rem;
 }
 
 .output {
     color: #00ff00;
     margin-bottom: 5px;
+    font-family: 'Courier New', monospace;
 }
 
 .output:before {
@@ -196,43 +206,44 @@ button:active {
 
 #cmdInput {
     width: 100%;
-    background: #111;
-    border: 1px solid #333;
+    background: #000;
+    border: none;
+    border-top: 1px solid #00ff00;
     color: #00ff00;
     padding: 10px;
-    border-radius: 4px;
     font-family: inherit;
     outline: none;
+    border-radius: 0;
 }
 
 #cmdInput:focus {
-    border-color: #00ff00;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    background: #111;
 }
 
-/* Footer */
+/* Footer - minimalista */
 footer {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 20px;
     margin-top: 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #222;
 }
 
 .heart {
     color: #ff0066;
     display: inline-block;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
 }
 
 .footer-note {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: 0.75rem;
+    color: #555;
     margin-top: 10px;
+}
+
+.footer-identity {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.85rem;
 }
 
 /* Responsividade */
@@ -246,6 +257,15 @@ footer {
     }
 
     .counter {
-        gap: 10px;
+        gap: 8px;
+    }
+
+    .counter button {
+        width: 35px;
+        height: 35px;
+    }
+
+    #count {
+        font-size: 1.2rem;
     }
 }
