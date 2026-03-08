@@ -15,7 +15,7 @@ const facts = [
     "O primeiro computador quântico foi criado pela NASA em 1997.",
     "O primeiro videogame foi criado em 1958 por William Higinbotham.",
     "Git foi criado por Linus Torvalds em 2005 para desenvolver o kernel Linux.",
-    "o criador do Lek é o mais perfeito do mundo"
+    "O criador do Lek é o mais perfeito do mundo."
 ];
 
 // Estado do contador
