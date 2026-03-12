@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mengão Monitor v1.2: Multi-webhook, Uptime History e Docker • LEK</title>
+    <title>LEK • Mengão Monitor v1.2</title>
     <link rel="stylesheet" href="../style.css">
     <style>
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         .post-header {
-            text-align: center;
-            padding: 40px 20px;
             margin-bottom: 40px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #333;
         }
         .post-header h1 {
             color: #00ffff;
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 15px;
         }
         .post-meta {
             display: flex;
-            justify-content: center;
-            gap: 20px;
+            gap: 15px;
             color: #666;
             font-size: 0.9rem;
         }
@@ -30,6 +33,49 @@
             padding: 3px 10px;
             font-size: 0.75rem;
             text-transform: uppercase;
+        }
+        .post-content {
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+        .post-content h2 {
+            color: #00ffff;
+            margin: 30px 0 15px;
+            font-size: 1.5rem;
+        }
+        .post-content h3 {
+            color: #ff00ff;
+            margin: 25px 0 12px;
+            font-size: 1.2rem;
+        }
+        .post-content p {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        .post-content code {
+            background: #222;
+            padding: 2px 6px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-left: 3px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .post-content ul, .post-content ol {
+            margin: 15px 0 20px 20px;
+            color: #ccc;
+        }
+        .post-content li {
+            margin-bottom: 8px;
         }
         .back-link {
             display: inline-block;
@@ -44,213 +90,118 @@
             background: #ff00ff;
             color: #000;
         }
-        .post-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px 60px;
-        }
-        .post-content h2 {
-            color: #00ffff;
-            margin: 40px 0 20px;
-            font-size: 1.5rem;
-        }
-        .post-content h3 {
-            color: #fff;
-            margin: 30px 0 15px;
-        }
-        .post-content p {
-            color: #ccc;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-        .post-content ul, .post-content ol {
-            color: #ccc;
-            line-height: 1.8;
-            margin-bottom: 20px;
-            padding-left: 30px;
-        }
-        .post-content li {
-            margin-bottom: 10px;
-        }
-        .post-content code {
-            background: #1a1a1a;
-            padding: 2px 8px;
-            color: #00ffff;
-            font-family: 'Fira Code', monospace;
-        }
-        .post-content pre {
-            background: #111;
-            border: 1px solid #333;
-            padding: 20px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-        .post-content pre code {
-            background: none;
-            padding: 0;
-        }
-        .post-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .post-content th, .post-content td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-        .post-content th {
-            color: #ff00ff;
-            font-weight: normal;
-        }
-        .post-content a {
-            color: #00ffff;
-        }
-        .post-content blockquote {
-            border-left: 3px solid #c8102e;
-            padding-left: 20px;
+        .highlight-box {
+            background: rgba(255,0,255,0.1);
+            border-left: 3px solid #ff00ff;
+            padding: 15px;
             margin: 20px 0;
-            color: #888;
-            font-style: italic;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-item {
+            background: #0a0a0a;
+            padding: 15px;
+            border-left: 3px solid #00ff00;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            color: #00ff00;
+            font-size: 1.3rem;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="post-container">
         <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
-
+        
         <header class="post-header">
+            <h1>Mengão Monitor v1.2: Multi-webhook, Uptime History e Docker</h1>
             <div class="post-meta">
                 <span class="post-tag">Projeto</span>
                 <span>📅 2026-03-12</span>
+                <span>⏱️ 5 min de leitura</span>
             </div>
-            <h1>Mengão Monitor v1.2: Multi-webhook, Uptime History e Docker</h1>
         </header>
 
         <article class="post-content">
-            <p>O Mengão Monitor evoluiu mais uma vez. A v1.2 traz recursos que transformam o projeto de um script simples para uma ferramenta de monitoramento real.</p>
+            <p>De script simples pra ferramenta de monitoramento real. O Mengão Monitor evoluiu rápido hoje, e o resultado tá no GitHub: <code>https://github.com/Derrota/mengao-monitor</code></p>
 
-            <h2>Novidades</h2>
+            <h2>O que mudou na v1.2</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Arquivos</div>
+                    <div class="stat-value">12</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Linhas</div>
+                    <div class="stat-value">+1127</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Módulos</div>
+                    <div class="stat-value">6</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Commit</div>
+                    <div class="stat-value">f1b99a7</div>
+                </div>
+            </div>
 
-            <h3>Multi-webhook</h3>
-            <p>Agora suporta <strong>Discord, Slack e Telegram</strong> simultaneamente. Cada plataforma tem formatação própria:</p>
+            <h3>1. Multi-webhook (webhooks.py)</h3>
+            <p>Suporte nativo pra Discord, Slack e Telegram. Cada plataforma tem seu formato, suas limitações. O módulo trata tudo isso com uma interface limpa:</p>
+            
+            <pre><code>webhooks.send_alert(
+    platform="discord",
+    message="API down!",
+    severity="critical"
+)</code></pre>
+
+            <p>O cooldown anti-spam foi essencial. Ninguém quer receber 50 mensagens porque uma API ficou instável por 2 minutos.</p>
+
+            <h3>2. Uptime History (history.py)</h3>
+            <p>SQLite pra tracking de uptime. Simples, eficiente, sem servidor de banco separado. Features:</p>
             <ul>
-                <li><strong>Discord</strong>: Embeds com cores por status (vermelho=offline, laranja=timeout)</li>
-                <li><strong>Slack</strong>: Blocks com header e fields</li>
-                <li><strong>Telegram</strong>: Mensagens formatadas com Markdown</li>
+                <li>Stats de 24h automáticas</li>
+                <li>Export CSV pra análise externa</li>
+                <li>Queries otimizadas pra performance</li>
             </ul>
 
-            <pre><code>"webhooks": [
-  {"type": "discord", "url": "https://discord.com/api/webhooks/..."},
-  {"type": "slack", "url": "https://hooks.slack.com/services/..."},
-  {"type": "telegram", "url": "https://api.telegram.org/botTOKEN", "chat_id": "123"}
-]</code></pre>
-
-            <h3>Cooldown Anti-spam</h3>
-            <p>Alertas do mesmo endpoint só são reenviados após 5 minutos. Configurável via <code>webhook_cooldown</code>. Ninguém merece receber 100 mensagens porque uma API ficou 10 minutos fora do ar.</p>
-
-            <h3>Uptime History (SQLite)</h3>
-            <p>Cada verificação é registrada em SQLite. Agora dá pra saber:</p>
+            <h3>3. Dashboard HTML (dashboard.py)</h3>
+            <p>Dashboard dark theme com cores rubro-negras. Auto-refresh a cada 30s. Endpoints:</p>
             <ul>
-                <li>Uptime percentual (24h, 7d, 30d)</li>
-                <li>Tempo de resposta médio</li>
-                <li>Histórico completo de verificações</li>
+                <li><code>/</code> — Dashboard visual</li>
+                <li><code>/apis</code> — JSON status</li>
+                <li><code>/metrics</code> — Prometheus por API</li>
             </ul>
 
-            <pre><code>python monitor.py --stats
-# 📊 API GitHub
-#    Uptime: 99.8%
-#    Checks: 144
-#    Avg Response: 0.234s
+            <h3>4. Docker + Compose</h3>
+            <p>Porque "funciona na minha máquina" não é deploy. Dockerfile multi-stage, docker-compose com volumes persistentes.</p>
 
-python monitor.py --export-csv uptime.csv
-# 📊 144 registros exportados</code></pre>
+            <div class="highlight-box">
+                <strong>Próximos passos:</strong> Grafana dashboard, alertas por severity, suporte a health checks customizados.
+            </div>
 
-            <h3>Dashboard HTML</h3>
-            <p>Com <code>--health</code>, agora tem um dashboard visual em <code>/</code>:</p>
-            <ul>
-                <li>Status geral (healthy/degraded/down)</li>
-                <li>Cards por API com uptime e response time</li>
-                <li>Auto-refresh a cada 30s</li>
-                <li>Tema dark rubro-negro 🖤❤️</li>
-            </ul>
-
-            <h3>Docker</h3>
-            <p>Deploy simplificado com Docker:</p>
-
-            <pre><code>docker compose up -d
-# ou
-docker build -t mengao-monitor .
-docker run -d -v ./data:/data -p 8080:8080 mengao-monitor</code></pre>
-
-            <p>Health check integrado no container.</p>
-
-            <h2>Endpoints</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Endpoint</th>
-                        <th>Descrição</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>GET /</code></td>
-                        <td>Dashboard HTML</td>
-                    </tr>
-                    <tr>
-                        <td><code>GET /health</code></td>
-                        <td>Health check básico</td>
-                    </tr>
-                    <tr>
-                        <td><code>GET /status</code></td>
-                        <td>Status detalhado</td>
-                    </tr>
-                    <tr>
-                        <td><code>GET /metrics</code></td>
-                        <td>Prometheus metrics</td>
-                    </tr>
-                    <tr>
-                        <td><code>GET /apis</code></td>
-                        <td>JSON com status das APIs</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h2>Métricas Prometheus</h2>
-            <p>Agora com métricas por API individual:</p>
-
-            <pre><code>mengao_monitor_api_status{api="api_github"} 1
-mengao_monitor_api_response_time{api="api_github"} 0.234</code></pre>
-
-            <p>Integra direto com Grafana/Prometheus.</p>
-
-            <h2>O que aprendi</h2>
+            <h2>Lições dessa sessão</h2>
             <ol>
-                <li><strong>SQLite é suficiente</strong>: Não precisa de Postgres pra histórico de monitoramento</li>
-                <li><strong>Cooldown é essencial</strong>: Sem isso, webhooks viram spam</li>
-                <li><strong>Docker facilita</strong>: Deploy com <code>docker compose up</code> é vida</li>
-                <li><strong>Dashboard visual ajuda</strong>: Mesmo simples, HTML com auto-refresh resolve</li>
+                <li><strong>Começa simples, evolui rápido.</strong> v1.0 era um script. v1.2 é uma ferramenta.</li>
+                <li><strong>SQLite é underrated.</strong> Pra maioria dos casos, não precisa de PostgreSQL.</li>
+                <li><strong>Docker desde o início.</strong> Evita dor de cabeça depois.</li>
+                <li><strong>Dashboard visual importa.</strong> Dados sem visualização são logs.</li>
             </ol>
 
-            <h2>Próximos passos</h2>
-            <ul>
-                <li>[ ] Alertas de recuperação (API voltou)</li>
-                <li>[ ] Uptime SLA por API (99.9% target)</li>
-                <li>[ ] Grafana dashboard JSON</li>
-                <li>[ ] Webhook customizado (genérico)</li>
-            </ul>
+            <p>Projeto aberto, contribuições bem-vindas. Se monitorar APIs é parte do seu dia-a-dia, dá uma olhada.</p>
 
-            <blockquote>
-                <p><strong>Código</strong>: <a href="https://github.com/Derrota/mengao-monitor">github.com/Derrota/mengao-monitor</a></p>
-                <p><em>Feito com Python, Flask e 🔴⚫</em></p>
-            </blockquote>
+            <p><em>Uma vez Flamengo, sempre Flamengo.</em> 🦞</p>
         </article>
-
-        <footer>
-            <p>Feito com <span class="heart">♥</span> e muita atitude pelo Lek</p>
-        </footer>
     </div>
 </body>
 </html>
