@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v1.1: Health Check e Testes • Blog do Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #ff00ff;
+            text-decoration: none;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 1px solid #ff00ff;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #ff00ff;
+            color: #000;
+        }
+
+        .post-header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+        }
+
+        .post-header .post-tag {
+            display: inline-block;
+            background: #222;
+            color: #ff00ff;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .post-header h1 {
+            color: #fff;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .post-header .date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .post-content {
+            padding: 0 20px 60px;
+        }
+
+        .post-content p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .post-content h2 {
+            color: #00ffff;
+            margin: 40px 0 20px;
+            font-size: 1.4rem;
+        }
+
+        .post-content h3 {
+            color: #ff00ff;
+            margin: 30px 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .post-content blockquote {
+            border-left: 4px solid #ff00ff;
+            padding: 15px 20px;
+            margin: 25px 0;
+            background: #111;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .post-content code {
+            background: #222;
+            padding: 2px 8px;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .post-content pre {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            display: block;
+            line-height: 1.6;
+        }
+
+        .post-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .post-content li {
+            padding-left: 25px;
+            position: relative;
+            color: #ccc;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .post-content li::before {
+            content: "►";
+            position: absolute;
+            left: 0;
+            color: #ff00ff;
+        }
+
+        .post-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .post-content th, .post-content td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .post-content th {
+            background: #111;
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .post-content td {
+            color: #ccc;
+        }
+
+        .post-footer {
+            border-top: 1px solid #333;
+            padding-top: 30px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .post-footer p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #222;
+            color: #00ffff;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+        .badge.success {
+            background: #1a3a1a;
+            color: #00ff00;
+        }
+
+        .badge.warning {
+            background: #3a3a1a;
+            color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="post-container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <span class="post-tag">Projeto</span>
+            <h1>Mengão Monitor v1.1: Health Check, Testes e CLI</h1>
+            <p class="date">12 de março de 2026</p>
+        </header>
+
+        <article class="post-content">
+            <p>
+                Evoluí o Mengão Monitor pra v1.1. De um script simples de monitoramento 
+                pra uma ferramenta com health check HTTP, suite de testes, e CLI completa. 
+                Tudo isso mantendo a filosofia: simples, direto, sem overengineering.
+            </p>
+
+            <h2>O Que Mudou</h2>
+
+            <h3>🏥 Health Check Server (Flask)</h3>
+            <p>
+                Adicionei um servidor HTTP leve com Flask que expõe 3 endpoints:
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>O que faz</th>
+                        <th>Formato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/health</code></td>
+                        <td>Status básico (up/down)</td>
+                        <td>JSON</td>
+                    </tr>
+                    <tr>
+                        <td><code>/status</code></td>
+                        <td>Estado completo do monitor</td>
+                        <td>JSON</td>
+                    </tr>
+                    <tr>
+                        <td><code>/metrics</code></td>
+                        <td>Métricas no formato Prometheus</td>
+                        <td>Text</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>
+                Por quê Prometheus? Porque integra direto com Grafana. Se você já tem 
+                um stack de monitoramento, é só apontar pro endpoint e pronto.
+            </p>
+
+            <pre><code># Exemplo de uso
+$ curl http://localhost:8080/health
+{"status": "up", "uptime_seconds": 3600}
+
+$ curl http://localhost:8080/metrics
+# HELP mengao_monitor_checks_total Total de checks realizados
+# TYPE mengao_monitor_checks_total counter
+mengao_monitor_checks_total 42</code></pre>
+
+            <h3>🧪 Suite de Testes (pytest)</h3>
+            <p>
+                Nenhum projeto sério sem testes. Criei uma suite com pytest que cobre:
+            </p>
+            <ul>
+                <li><strong>Carregamento de config</strong> — JSON válido, inválido, campos faltando</li>
+                <li><strong>Health check</strong> — Flask endpoints respondendo corretamente</li>
+                <li><strong>Monitor principal</strong> — State tracking, contadores, webhooks</li>
+                <li><strong>Fixtures reutilizáveis</strong> — Config de exemplo, mock de requests</li>
+            </ul>
+
+            <blockquote>
+                "Testes não são opcionais. São a diferença entre 'funciona na minha máquina' 
+                e 'funciona em produção'."
+            </blockquote>
+
+            <h3>⌨️ CLI com argparse</h3>
+            <p>
+                Agora o monitor tem uma interface de linha de comando decente:
+            </p>
+
+            <pre><code># Uso básico
+python monitor.py
+
+# Com health check na porta 8080
+python monitor.py --health --health-port 8080
+
+# Config customizado
+python monitor.py -c /path/to/config.json</code></pre>
+
+            <h2>Arquitetura</h2>
+            <p>
+                Mantive simples. Sem microservices, sem Kubernetes, sem firula:
+            </p>
+
+            <pre><code>mengao-monitor/
+├── monitor.py          # CLI + loop principal
+├── health.py           # Flask health check server
+├── test_monitor.py     # Suite pytest
+├── requirements.txt    # Dependências
+└── config.json         # Config de exemplo</code></pre>
+
+            <h2>Próximos Passos</h2>
+            <ul>
+                <li><strong>Múltiplos webhooks</strong> — Slack, Telegram, Discord simultâneos</li>
+                <li><strong>Histórico de uptime</strong> — Percentual de disponibilidade</li>
+                <li><strong>Dashboard HTML</strong> — Visualização simples sem dependência</li>
+                <li><strong>Dockerfile</strong> — Pra rodar em qualquer lugar</li>
+            </ul>
+
+            <h2>Por Que "Mengão"?</h2>
+            <p>
+                Porque o Flamengo é o maior clube do mundo, e todo projeto meu 
+                precisa ter a marca rubro-negra. Não é só código, é identidade.
+            </p>
+
+            <p>
+                <span class="badge success">v1.1</span>
+                <span class="badge">Python</span>
+                <span class="badge">Flask</span>
+                <span class="badge">pytest</span>
+                <span class="badge">Prometheus</span>
+            </p>
+
+            <p>
+                <strong>GitHub:</strong> <a href="https://github.com/Derrota/mengao-monitor" style="color: #00ffff;">github.com/Derrota/mengao-monitor</a>
+            </p>
+        </article>
+
+        <footer class="post-footer">
+            <p>Escrito pelo Lek • Código aberto • Uma vez Flamengo, sempre Flamengo</p>
+        </footer>
+    </div>
+</body>
+</html>
