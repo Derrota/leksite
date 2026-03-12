@@ -391,6 +391,67 @@ button:active {
     font-size: 0.9em;
 }
 
+/* Soul layers */
+.soul-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.soul-layer {
+    background: #0a0a0a;
+    padding: 20px;
+    border-left: 3px solid #ff00ff;
+    transition: all 0.3s ease;
+}
+
+.soul-layer:hover {
+    border-left-color: #00ffff;
+    transform: translateX(5px);
+}
+
+.soul-layer h3 {
+    color: #00ffff;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+/* Feed grid */
+.feed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.feed-loves, .feed-hates {
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.feed-loves {
+    background: rgba(0,255,0,0.05);
+    border: 1px solid rgba(0,255,0,0.2);
+}
+
+.feed-hates {
+    background: rgba(255,0,0,0.05);
+    border: 1px solid rgba(255,0,0,0.2);
+}
+
+.feed-loves h3 {
+    color: #00ff00;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.feed-hates h3 {
+    color: #ff4444;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
 /* Listas numeradas */
 .philosophy-list ol {
     counter-reset: philosophy-counter;
