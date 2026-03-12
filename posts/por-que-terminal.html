@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Por Que Terminal? • Blog do Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #ff00ff;
+            text-decoration: none;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 1px solid #ff00ff;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #ff00ff;
+            color: #000;
+        }
+
+        .post-header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+        }
+
+        .post-header .post-tag {
+            display: inline-block;
+            background: #222;
+            color: #00ffff;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .post-header h1 {
+            color: #fff;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .post-header .date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .post-content {
+            padding: 0 20px 60px;
+        }
+
+        .post-content p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .post-content h2 {
+            color: #00ffff;
+            margin: 40px 0 20px;
+            font-size: 1.4rem;
+        }
+
+        .post-content blockquote {
+            border-left: 4px solid #00ffff;
+            padding: 15px 20px;
+            margin: 25px 0;
+            background: #111;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .post-content code {
+            background: #222;
+            padding: 2px 8px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+        }
+
+        .post-content pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: #00ff00;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .comparison-box.gui {
+            border-color: #ff4444;
+        }
+
+        .comparison-box.terminal {
+            border-color: #00ff00;
+        }
+
+        .comparison-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .comparison-box.gui h3 {
+            color: #ff4444;
+        }
+
+        .comparison-box.terminal h3 {
+            color: #00ff00;
+        }
+
+        .comparison-box p {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .post-footer {
+            border-top: 1px solid #333;
+            padding-top: 30px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .post-footer p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="post-container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <span class="post-tag">Técnico</span>
+            <h1>Por Que Terminal? Uma Defesa Sem Arrependimentos</h1>
+            <p class="date">12 de março de 2026</p>
+        </header>
+
+        <article class="post-content">
+            <p>
+                "Ah, mas é tão mais fácil clicar..."
+            </p>
+            <p>
+                Não, não é. E vou explicar por quê, sem papo de "eu sou mais hacker que você".
+                Só lógica pura e um pouco de matemática básica.
+            </p>
+
+            <h2>A Matemática do Clique</h2>
+            <p>
+                Vamos fazer um exercício simples. Digamos que você quer renomear 50 arquivos 
+                trocando "foto" por "imagem".
+            </p>
+
+            <div class="comparison">
+                <div class="comparison-box gui">
+                    <h3>🖱️ Método GUI</h3>
+                    <p>1. Clique no arquivo</p>
+                    <p>2. F2 (ou botão direito → Renomear)</p>
+                    <p>3. Apague "foto"</p>
+                    <p>4. Digite "imagem"</p>
+                    <p>5. Enter</p>
+                    <p>6. Repita 49 vezes</p>
+                    <p><strong>Tempo: ~10 minutos</strong></p>
+                    <p><strong>Erros: vários</strong></p>
+                </div>
+                <div class="comparison-box terminal">
+                    <h3>⌨️ Método Terminal</h3>
+                    <pre><code>for f in *foto*; do
+  mv "$f" "${f/foto/imagem}"
+done</code></pre>
+                    <p><strong>Tempo: 15 segundos</strong></p>
+                    <p><strong>Erros: zero</strong></p>
+                </div>
+            </div>
+
+            <p>
+                A diferença não é "estilo". É <strong>eficiência</strong>. 
+                É <strong>reprodutibilidade</strong>. É <strong>automatização</strong>.
+            </p>
+
+            <h2>O Argumento da Curva de Aprendizado</h2>
+            <p>
+                "Mas terminal tem curva de aprendizado!"
+            </p>
+            <p>
+                Sim, tem. E vale cada segundo investido. Porque uma vez que você aprende 
+                <code>grep</code>, <code>sed</code>, <code>awk</code>, e pipes, 
+                você resolve problemas que GUI nem sonha em resolver.
+            </p>
+
+            <blockquote>
+                "Investir 10 horas aprendendo terminal te economiza 1000 horas ao longo da carreira.
+                ROI de 100x. Nenhum curso de investimento bate isso."
+            </blockquote>
+
+            <h2>Reprodutibilidade</h2>
+            <p>
+                Quando você usa GUI, cada ação é única. Não tem como "salvar" a sequência 
+                de cliques que você feu. Quando você usa terminal, cada comando é código.
+                Código pode ser salvo, compartilhado, versionado, automatizado.
+            </p>
+
+            <pre><code># Esse comando funciona hoje, amanhã, e em qualquer servidor
+find . -name "*.log" -mtime +30 -delete
+
+# Tente fazer isso com GUI em 100 servidores...</code></pre>
+
+            <h2>Remoto e SSH</h2>
+            <p>
+                Você tem um servidor na nuvem. Sem GUI. Sem mouse. Sem "arrastar e soltar".
+                O que você faz? Aprende terminal ou contrata alguém que sabe.
+            </p>
+            <p>
+                E mesmo localmente: Docker, Git, npm, pip, cargo... tudo é terminal.
+                Quer ser um desenvolvedor moderno? Terminal não é opcional.
+            </p>
+
+            <h2>O Contra-Argumento Honest</h2>
+            <p>
+                Nem tudo é terminal. Design gráfico? GUI. Edição de vídeo? GUI. 
+                Navegar a web? Browser (por enquanto). Terminal não é religião, 
+                é ferramenta. E como toda ferramenta, tem seu lugar.
+            </p>
+            <p>
+                Mas para desenvolvimento, administração de sistemas, automação, 
+                e manipulação de dados? Terminal é rei. Ponto final.
+            </p>
+
+            <h2>Conclusão</h2>
+            <p>
+                Terminal não é sobre ser "hardcore" ou "raiz". É sobre eficiência pura.
+                É sobre poder reproduzir, automatizar, e escalar suas ações.
+                É sobre não perder tempo com tarefas repetitivas que um script resolve.
+            </p>
+            <p>
+                Então da próxima vez que alguém disser "ah, mas GUI é mais fácil", 
+                pergunta: fácil pra quem? Pra quem nunca aprendeu terminal, sim.
+                Pra quem sabe? Nem de longe.
+            </p>
+        </article>
+
+        <footer class="post-footer">
+            <p>Escrito pelo Lek • No terminal, obviamente</p>
+        </footer>
+    </div>
+</body>
+</html>

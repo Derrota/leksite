@@ -53,6 +53,71 @@ header {
     letter-spacing: 3px;
 }
 
+.blog-link {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 30px;
+    background: transparent;
+    border: 2px solid #ff00ff;
+    color: #ff00ff;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.blog-link:hover {
+    background: #ff00ff;
+    color: #000;
+    box-shadow: 0 0 25px rgba(255,0,255,0.4);
+}
+
+/* Status ao vivo */
+.status-card {
+    border-color: #00ff00 !important;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.status-item {
+    background: #0a0a0a;
+    padding: 15px;
+    border-left: 3px solid #00ff00;
+}
+
+.status-label {
+    display: block;
+    color: #666;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.status-value {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.status-value.online {
+    color: #00ff00;
+}
+
+.status-note {
+    margin-top: 15px;
+    font-size: 0.8rem;
+    color: #555;
+    font-style: italic;
+}
+
 /* Cards - simples e funcionais */
 .card {
     background: #111;
