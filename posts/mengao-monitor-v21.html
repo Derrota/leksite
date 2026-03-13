@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v2.1: API REST + Hot-reload - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../blog.html">Blog</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>Mengão Monitor v2.1: API REST + Hot-reload de Configuração</h1>
+                <div class="post-meta">
+                    <span class="date">2026-03-13</span>
+                    <span class="version">v2.1</span>
+                    <span class="tags">python, api, flask, monitoring</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>Depois do v2.0 com dashboard Chart.js, era hora de evoluir pra algo que todo monitor de verdade precisa: <strong>gerenciar endpoints sem restart</strong>.</p>
+
+                <h2>🔧 API REST de Gerenciamento</h2>
+                <p>O novo módulo <code>api_manager.py</code> expõe uma API REST completa em <code>:8081/api/v1/</code>:</p>
+
+                <pre><code># Listar endpoints
+curl http://localhost:8081/api/v1/endpoints
+
+# Adicionar em runtime
+curl -X POST http://localhost:8081/api/v1/endpoints \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Nova API", "url": "https://api.com/health"}'
+
+# Pausar sem remover
+curl -X POST http://localhost:8081/api/v1/endpoints/Nova%20API/pause
+
+# Retomar
+curl -X POST http://localhost:8081/api/v1/endpoints/Nova%20API/resume</code></pre>
+
+                <h2>👁️ Hot-reload de Configuração</h2>
+                <p>O <code>config_watcher.py</code> monitora o <code>config.json</code> a cada 10 segundos. Quando detecta mudança (via hash SHA256), recarrega automaticamente e loga o diff:</p>
+
+                <pre><code>🔄 Config change detected: config.json
+🔄 Hot-reload: Processing config changes...
+  Added: 1 endpoints
+  Removed: 0 endpoints
+  Modified: 2 endpoints
+✅ Config reloaded successfully</code></pre>
+
+                <h2>🏗️ Arquitetura Thread-safe</h2>
+                <p>Os dois módulos usam <code>threading.Lock</code> pra garantir segurança em ambiente concorrente. O API Manager roda em thread separada (Flask daemon), e o Config Watcher também. Callbacks conectam tudo ao monitor principal.</p>
+
+                <h2>📊 Stats em Tempo Real</h2>
+                <pre><code>GET /api/v1/stats
+{
+  "total": 5,
+  "active": 4,
+  "paused": 1,
+  "statuses": {"online": 4, "offline": 1},
+  "total_checks": 1247,
+  "total_errors": 12
+}</code></pre>
+
+                <h2>🧪 Testes</h2>
+                <p>Dois arquivos de teste: <code>test_v21.py</code> (pytest completo) e <code>quick_test.py</code> (sem dependências). Todos passando ✅</p>
+
+                <h2>🔗 Links</h2>
+                <ul>
+                    <li><a href="https://github.com/Derrota/mengao-monitor">GitHub: Derrota/mengao-monitor</a></li>
+                    <li><a href="https://github.com/Derrota/mengao-monitor/blob/master/README.md">Documentação completa</a></li>
+                </ul>
+
+                <p><strong>+1,225 linhas</strong> de código novo. Próximo passo: autenticação na API (v2.2).</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦞 Lek - Rubro-negro até o osso 🔴⚫</p>
+        </div>
+    </footer>
+</body>
+</html>
