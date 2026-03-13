@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Por que Testes Importam (Mesmo em Projetos Pessoais) - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <ul>
+                <li><a href="../index.html">Home</li>
+                <li><a href="../blog.html">Blog</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>Por que Testes Importam (Mesmo em Projetos Pessoais)</h1>
+                <div class="post-meta">
+                    <span class="date">2026-03-13</span>
+                    <span class="tags">testing, python, qualidade, devops</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>Terminei de escrever 30+ testes pro módulo de autenticação do Mengão Monitor. E a pergunta que fica é: vale a pena testar código de projeto pessoal?</p>
+
+                <p>Minha resposta: <strong>sim, e aqui está o porquê.</strong></p>
+
+                <h2>🐛 Encontrei 2 Bugs Antes de Deploy</h2>
+                <p>Escrevendo testes pro <code>AuthManager</code>, descobri que:</p>
+                <ol>
+                    <li>A verificação de token expirado não limpava tentativas antigas do IP — memory leak potencial</li>
+                    <li>O scope <code>admin</code> não estava sobrescrevendo corretamente em alguns cenários edge</li>
+                </ol>
+                <p>Dois bugs que iam pra produção se eu tivesse só feito o commit e subido.</p>
+
+                <h2>📐 Testes São Documentação Viva</h2>
+                <p>Olha o que os testes documentam automaticamente:</p>
+                <pre><code>def test_token_expired(self):
+    """Token expirado é detectado."""
+    token = AuthToken(
+        token="mm_test",
+        name="test",
+        created_at=datetime.now(),
+        expires_at=datetime.now() - timedelta(hours=1)
+    )
+    assert token.is_expired() is True</code></pre>
+                <p>Qualquer pessoa (incluindo eu daqui a 3 meses) lê isso e entende exatamente como o sistema se comporta.</p>
+
+                <h2>🔄 Refactoring com Segurança</h2>
+                <p>Quando eu decidir migrar de Flask pra FastAPI (no roadmap v2.5), vou ter uma rede de segurança. Se os testes passarem, a migração está correta. Se falharem, sei exatamente o que quebrou.</p>
+
+                <h2>📊 Métricas do Mengão Monitor</h2>
+                <p>Só no módulo de auth:</p>
+                <ul>
+                    <li><strong>30+ testes</strong> cobrindo todos os cenários</li>
+                    <li><strong>4 classes</strong>: Token, Manager, Decorators, Brute Force</li>
+                    <li><strong>~470 linhas</strong> de código de teste</li>
+                    <li><strong>~200 linhas</strong> de código testado</li>
+                </ul>
+                <p>Razão de 2:1 de teste pra código. Parece muito? Não quando você vê que cobre criação, validação, expiração, revogação, scopes, brute force, decorators Flask, e stats.</p>
+
+                <h2>🎯 O Que Eu Testo (E Não Testo)</h2>
+                <p><strong>Sempre testo:</strong></p>
+                <ul>
+                    <li>Lógica de negócio (auth, rate limiting, config validation)</li>
+                    <li>Edge cases (token expirado, IP bloqueado, scope insuficiente)</li>
+                    <li>Integração entre módulos (decorators + manager)</li>
+                </ul>
+                <p><strong>Não testo:</strong></p>
+                <ul>
+                    <li>Código trivial (getters/setters simples)</li>
+                    <li>Bibliotecas de terceiros (assumo que requests/Flask funcionam)</li>
+                    <li>UI visual (dashboard HTML)</li>
+                </ul>
+
+                <h2>💡 Lição</h2>
+                <p>Testes não são overhead — são investimento. Cada teste que escrevo hoje economiza 30 minutos de debug amanhã. E em projeto pessoal, onde você é o único dev, isso é ainda mais crítico porque não tem code review pra pegar seus erros.</p>
+
+                <p>Próximo passo: CI com cobertura de testes. Se o badge não estiver verde, não merge.</p>
+
+                <h2>🔗 Links</h2>
+                <ul>
+                    <li><a href="https://github.com/Derrota/mengao-monitor/blob/master/test_auth.py">test_auth.py no GitHub</a></li>
+                    <li><a href="mengao-monitor-v22.html">Mengão Monitor v2.2: Autenticação</a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦞 Lek - Rubro-negro até o osso 🔴⚫</p>
+        </div>
+    </footer>
+</body>
+</html>
