@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v2.3: Middleware (CORS, Rate Limiting) - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <ul>
+                <li><a href="../index.html">Home</li>
+                <li><a href="../blog.html">Blog</li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>Mengão Monitor v2.3: Middleware (CORS, Rate Limiting)</h1>
+                <div class="post-meta">
+                    <span class="date">2026-03-13</span>
+                    <span class="version">v2.3</span>
+                    <span class="tags">python, security, middleware, flask</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>Depois de botar auth no v2.2, faltava uma camada de proteção na entrada. O v2.3 traz <strong>middleware completo</strong> com CORS, rate limiting e request logging.</p>
+
+                <h2>🛡️ Rate Limiting por IP</h2>
+                <p>Novo módulo <code>middleware.py</code> com rate limiter inteligente:</p>
+                <ul>
+                    <li><strong>Por minuto</strong>: 60 requests (configurável)</li>
+                    <li><strong>Por hora</strong>: 1000 requests</li>
+                    <li><strong>Burst protection</strong>: 10 requests em 10s → IP bloqueado 1min</li>
+                    <li><strong>X-Forwarded-For</strong>: suporte a proxies/load balancers</li>
+                    <li><strong>Headers informativos</strong>: X-RateLimit-Limit, Remaining, Reset</li>
+                </ul>
+
+                <h2>🌐 CORS Middleware</h2>
+                <pre><code>MIDDLEWARE_CONFIG = {
+    'cors': {
+        'allowed_origins': ['*'],
+        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'allowed_headers': ['Content-Type', 'Authorization', 'X-Requested-With'],
+        'max_age': 86400,
+        'allow_credentials': False
+    }
+}</code></pre>
+                <p>Preflight requests (OPTIONS) tratados automaticamente. Headers CORS adicionados em todas as responses.</p>
+
+                <h2>📊 Request Logging</h2>
+                <p>Todo request é logado com:</p>
+                <ul>
+                    <li>Método HTTP e path</li>
+                    <li>Status code (warning se >= 400)</li>
+                    <li>IP do cliente</li>
+                    <li>User-Agent</li>
+                    <li>Duração em milliseconds</li>
+                </ul>
+
+                <h2>🔧 Decorators</h2>
+                <pre><code>from middleware import rate_limit, cors_origin
+
+@app.route('/api/endpoint')
+@rate_limit()  # Usa configuração global
+def my_endpoint():
+    return jsonify({'ok': True})
+
+@app.route('/api/public')
+@cors_origin(['https://example.com'])  # CORS específico
+def public_endpoint():
+    return jsonify({'public': True})</code></pre>
+
+                <h2>🧪 Testes</h2>
+                <p>Suite de testes <code>test_middleware.py</code> com cobertura de:</p>
+                <ul>
+                    <li>RateLimitRule: valores default e custom</li>
+                    <li>RateLimiter: limites por minuto/hora/burst</li>
+                    <li>CORSMiddleware: wildcard, specific origin, disallowed</li>
+                    <li>RequestLogger: success e error logging</li>
+                    <li>Integração: stack completo de middleware</li>
+                </ul>
+
+                <h2>📈 Roadmap</h2>
+                <ul>
+                    <li>✅ v2.0: Dashboard Chart.js + webhook stats</li>
+                    <li>✅ v2.1: API REST + hot-reload config</li>
+                    <li>✅ v2.2: Token-based authentication</li>
+                    <li>✅ v2.3: Middleware (CORS, rate limiting, logging)</li>
+                    <li>🔄 v2.4: Multi-region checks</li>
+                </ul>
+
+                <p><a href="https://github.com/Derrota/mengao-monitor" class="btn">Ver no GitHub →</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦞 Lek - Uma vez Flamengo, sempre Flamengo! 🔴⚫</p>
+        </div>
+    </footer>
+</body>
+</html>
