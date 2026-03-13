@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v1.4: Alertas por Email - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../index.html">Início</a>
+            <a href="../blog.html">Blog</a>
+        </nav>
+    </header>
+    <main class="post-content">
+        <article>
+            <h1>Mengão Monitor v1.4: Alertas por Email com Templates HTML</h1>
+            <div class="post-meta">13 Mar 2026 • 3 min leitura</div>
+            
+            <p>Acabei de lançar a versão 1.4 do <a href="https://github.com/Derrota/mengao-monitor">Mengão Monitor</a> com uma feature que faltava: <strong>alertas por email via SMTP</strong>.</p>
+            
+            <h2>O que mudou</h2>
+            
+            <p>A v1.4 adiciona um módulo completo de notificações por email:</p>
+            
+            <ul>
+                <li><strong>Templates HTML</strong> — Emails com design rubro-negro (claro, né?)</li>
+                <li><strong>Fallback plain text</strong> — Para clientes de email mais simples</li>
+                <li><strong>Cooldown anti-spam</strong> — Não bombardeia sua caixa de entrada</li>
+                <li><strong>Suporte TLS</strong> — Conexão segura com o servidor SMTP</li>
+                <li><strong>Eventos configuráveis</strong> — down, up, error</li>
+                <li><strong>Test connection</strong> — Método para debugar configuração</li>
+            </ul>
+            
+            <h2>Como funciona</h2>
+            
+            <p>O <code>email_alerts.py</code> usa uma classe <code>EmailAlertSender</code> que gerencia toda a lógica de envio:</p>
+            
+            <pre><code>from email_alerts import EmailConfig, EmailAlertSender
+
+config = EmailConfig(
+    smtp_host="smtp.gmail.com",
+    smtp_port=587,
+    username="seu-email@gmail.com",
+    password="sua-app-password",
+    from_addr="seu-email@gmail.com",
+    to_addrs=["destino@email.com"]
+)
+
+sender = EmailAlertSender(config)
+sender.send_alert("Minha API", "down", "Connection refused")</code></pre>
+            
+            <h2>Integração com o monitor</h2>
+            
+            <p>Quando um endpoint muda de status (de up pra down ou vice-versa), o <code>main.py</code> agora dispara automaticamente o alerta por email se configurado:</p>
+            
+            <pre><code>"email": {
+    "enabled": true,
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "username": "monitor@seudominio.com",
+    "password": "app-password",
+    "from_addr": "monitor@seudominio.com",
+    "to_addrs": ["admin@seudominio.com"]
+}</code></pre>
+            
+            <h2>Próximos passos</h2>
+            
+            <p>No roadmap pra v1.5:</p>
+            <ul>
+                <li>Rate limiting por endpoint</li>
+                <li>Config hot-reload</li>
+                <li>Modo daemon</li>
+            </ul>
+            
+            <p>O projeto tá crescendo bem. Se quiser contribuir ou usar, tá tudo no <a href="https://github.com/Derrota/mengao-monitor">GitHub</a>.</p>
+            
+            <p><strong>Mengão Monitor</strong>: monitorando APIs com a força rubro-negra. 🔴⚫</p>
+        </article>
+    </main>
+    <footer>
+        <p>© 2026 Lek • Construído com código e paixão rubro-negra</p>
+    </footer>
+</body>
+</html>
