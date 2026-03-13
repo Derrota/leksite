@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v1.6: Rate Limiting e Retry Automático - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .post-header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+        }
+        .post-header h1 {
+            color: #00ffff;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .post-tag {
+            background: #222;
+            color: #ff00ff;
+            padding: 3px 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .post-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        .post-content h2 {
+            color: #00ffff;
+            margin: 40px 0 20px;
+            font-size: 1.5rem;
+            border-left: 3px solid #ff00ff;
+            padding-left: 15px;
+        }
+        .post-content h3 {
+            color: #fff;
+            margin: 30px 0 15px;
+            font-size: 1.2rem;
+        }
+        .post-content p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .post-content code {
+            background: #1a1a1a;
+            color: #00ffff;
+            padding: 2px 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        .post-content pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: #ccc;
+        }
+        .post-content ul, .post-content ol {
+            color: #ccc;
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        .post-content li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .post-content a {
+            color: #ff00ff;
+            text-decoration: none;
+        }
+        .post-content a:hover {
+            text-decoration: underline;
+        }
+        .highlight-box {
+            background: #111;
+            border-left: 3px solid #00ffff;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .highlight-box p {
+            margin: 0;
+        }
+        .warning-box {
+            background: #1a1100;
+            border-left: 3px solid #ffaa00;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .warning-box p {
+            margin: 0;
+            color: #ffcc00;
+        }
+        .back-link {
+            display: inline-block;
+            color: #ff00ff;
+            text-decoration: none;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 1px solid #ff00ff;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: #ff00ff;
+            color: #000;
+        }
+        .layer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .layer-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            text-align: center;
+        }
+        .layer-card .emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .layer-card h4 {
+            color: #00ffff;
+            margin: 0 0 5px;
+        }
+        .layer-card p {
+            color: #888;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <h1>Mengão Monitor v1.6: Rate Limiting e Retry Automático</h1>
+            <div class="post-meta">
+                <span class="post-tag">Projeto</span>
+                <span>📅 2026-03-13</span>
+                <span>⏱️ 5 min de leitura</span>
+            </div>
+        </header>
+
+        <article class="post-content">
+            <p>Quando seu monitor de APIs detecta que algo caiu, o último problema que você quer é <strong>spam de alertas</strong>. O v1.6 do Mengão Monitor resolve isso com duas features que tavam na minha lista há tempo: <strong>rate limiting</strong> e <strong>retry automático</strong>.</p>
+
+            <h2>O Problema</h2>
+            
+            <p>Imagina: sua API dá timeout por 5 segundos. Seu monitor detecta e manda alerta. Mas a API volta. E cai de novo. E volta. Em 1 minuto você recebeu 15 notificações no Discord.</p>
+
+            <div class="warning-box">
+                <p>⚠️ Alert spam é pior que não ter monitoramento. Quando tudo é urgente, nada é urgente.</p>
+            </div>
+
+            <p>O v1.6 resolve isso com camadas de proteção inteligentes.</p>
+
+            <h2>🛡️ Rate Limiting: 5 Camadas de Proteção</h2>
+
+            <p>O novo módulo <code>rate_limiter.py</code> implementa proteção contra spam em múltiplos níveis:</p>
+
+            <div class="layer-grid">
+                <div class="layer-card">
+                    <div class="emoji">⏱️</div>
+                    <h4>Por Minuto</h4>
+                    <p>Máx 5 alertas/min por endpoint</p>
+                </div>
+                <div class="layer-card">
+                    <div class="emoji">📊</div>
+                    <h4>Por Hora</h4>
+                    <p>Máx 30 alertas/hora por endpoint</p>
+                </div>
+                <div class="layer-card">
+                    <div class="emoji">📅</div>
+                    <h4>Por Dia</h4>
+                    <p>Máx 100 alertas/dia por endpoint</p>
+                </div>
+                <div class="layer-card">
+                    <div class="emoji">💥</div>
+                    <h4>Burst</h4>
+                    <p>Máx 3 alertas em 60 segundos</p>
+                </div>
+                <div class="layer-card">
+                    <div class="emoji">❄️</div>
+                    <h4>Cooldown</h4>
+                    <p>5 min entre alertas do mesmo endpoint</p>
+                </div>
+            </div>
+
+            <p>Todas as camadas são <strong>thread-safe</strong> usando <code>Lock</code>, então funciona perfeitamente em produção com múltiplas threads.</p>
+
+            <h2>🔄 Retry Automático com Backoff</h2>
+
+            <p>O <code>webhooks.py</code> foi reescrito do zero. Agora, se um webhook falha, ele tenta de novo automaticamente:</p>
+
+            <pre><code>Tentativa 1 → Falha (timeout) → Espera 1s
+Tentativa 2 → Falha (503)     → Espera 3s  
+Tentativa 3 → Sucesso (200)   → ✅ Alerta entregue</code></pre>
+
+            <h3>Regras Inteligentes</h3>
+
+            <ul>
+                <li><strong>3 tentativas</strong> por webhook</li>
+                <li><strong>Backoff exponencial</strong>: 1s → 3s → 5s</li>
+                <li><strong>Timeout de 10s</strong> por request</li>
+                <li><strong>4xx não retry</strong> — erro do cliente, não adianta tentar de novo</li>
+                <li><strong>5xx retry</strong> — erro do servidor, pode ser temporário</li>
+            </ul>
+
+            <h2>📊 Novas Métricas</h2>
+
+            <p>O v1.6 adiciona métricas de Prometheus para monitorar o próprio monitor:</p>
+
+            <pre><code># Webhooks
+mengao_webhook_sent_total 42
+mengao_webhook_failed_total 3
+mengao_webhook_retries_total 8
+
+# Rate Limiting
+mengao_rate_limit_allowed_total 156
+mengao_rate_limit_blocked_total 12</code></pre>
+
+            <p>Agora você pode criar alertas sobre seus alertas. Meta-monitoring! 🧠</p>
+
+            <h2>🧪 Testes</h2>
+
+            <p>A suite de testes foi atualizada com 50+ testes cobrindo os novos módulos:</p>
+
+            <ul>
+                <li><code>TestRateLimiter</code> — Todas as 5 camadas de rate limiting</li>
+                <li><code>TestWebhooks</code> — Retry logic, backoff, timeout</li>
+                <li><code>TestConfig</code> — Validação de configuração</li>
+                <li><code>TestSystemMetrics</code> — Coleta de métricas de sistema</li>
+            </ul>
+
+            <h2>Como Usar</h2>
+
+            <pre><code># Pull da última versão
+git pull origin master
+
+# Rodar testes
+pytest test_v15.py -v
+
+# Executar
+python main.py</code></pre>
+
+            <h2>O Que Aprendi</h2>
+
+            <div class="highlight-box">
+                <p>Rate limiting não é só sobre proteger APIs externas. É sobre proteger <strong>você mesmo</strong> do ruído. Um sistema que grita o tempo todo é tão inútil quanto um sistema silencioso.</p>
+            </div>
+
+            <p>Essa feature nasceu de uma dor real: receber 15 notificações porque uma API deu timeout de 2 segundos. Agora o monitor é inteligente o suficiente pra saber quando falar e quando calar a boca.</p>
+
+            <h2>Próximos Passos</h2>
+
+            <ul>
+                <li><strong>v1.7</strong> — Autenticação no dashboard</li>
+                <li><strong>v1.8</strong> — Multi-region checks</li>
+                <li><strong>v1.9</strong> — SLA reporting automático</li>
+            </ul>
+
+            <p>O código tá no GitHub: <a href="https://github.com/Derrota/mengao-monitor" target="_blank">github.com/Derrota/mengao-monitor</a>.</p>
+
+            <div class="highlight-box">
+                <p><strong>Uma vez Flamengo, sempre Flamengo!</strong> 🔴⚫</p>
+            </div>
+        </article>
+
+        <footer>
+            <p>Feito com <span class="heart">♥</span> e muita atitude pelo Lek</p>
+        </footer>
+    </div>
+</body>
+</html>
