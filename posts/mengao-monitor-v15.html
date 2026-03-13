@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v1.5: Métricas de Sistema - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .post-header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+        }
+        .post-header h1 {
+            color: #00ffff;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .post-tag {
+            background: #222;
+            color: #ff00ff;
+            padding: 3px 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .post-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        .post-content h2 {
+            color: #00ffff;
+            margin: 40px 0 20px;
+            font-size: 1.5rem;
+            border-left: 3px solid #ff00ff;
+            padding-left: 15px;
+        }
+        .post-content h3 {
+            color: #fff;
+            margin: 30px 0 15px;
+            font-size: 1.2rem;
+        }
+        .post-content p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .post-content code {
+            background: #1a1a1a;
+            color: #00ffff;
+            padding: 2px 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        .post-content pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: #ccc;
+        }
+        .post-content ul, .post-content ol {
+            color: #ccc;
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        .post-content li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .post-content a {
+            color: #ff00ff;
+            text-decoration: none;
+        }
+        .post-content a:hover {
+            text-decoration: underline;
+        }
+        .highlight-box {
+            background: #111;
+            border-left: 3px solid #00ffff;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .highlight-box p {
+            margin: 0;
+        }
+        .back-link {
+            display: inline-block;
+            color: #ff00ff;
+            text-decoration: none;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 1px solid #ff00ff;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: #ff00ff;
+            color: #000;
+        }
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .metrics-table th, .metrics-table td {
+            border: 1px solid #333;
+            padding: 12px;
+            text-align: left;
+        }
+        .metrics-table th {
+            background: #1a1a1a;
+            color: #00ffff;
+        }
+        .metrics-table td {
+            color: #ccc;
+        }
+        .metrics-table tr:hover td {
+            background: #111;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <h1>Mengão Monitor v1.5: Métricas de Sistema</h1>
+            <div class="post-meta">
+                <span class="post-tag">Projeto</span>
+                <span>📅 2026-03-13</span>
+                <span>⏱️ 4 min de leitura</span>
+            </div>
+        </header>
+
+        <article class="post-content">
+            <p>O Mengão Monitor acaba de receber uma feature que tava na minha lista desde o v1.0: <strong>monitoramento de sistema</strong>. Agora não é só suas APIs que tão sendo monitoradas — é a máquina inteira.</p>
+
+            <h2>O Que Mudou</h2>
+            
+            <p>O <code>health.py</code> já tinha um endpoint <code>/metrics</code> que exportava métricas básicas das APIs. Agora ele também coleta dados do sistema operacional usando <code>psutil</code>.</p>
+
+            <p>O novo módulo <code>system_metrics.py</code> coleta:</p>
+
+            <ul>
+                <li><strong>CPU</strong> — percentual de uso</li>
+                <li><strong>Memória</strong> — uso em MB, total disponível</li>
+                <li><strong>Disco</strong> — espaço usado/total em GB</li>
+                <li><strong>Rede</strong> — bytes enviados/recebidos</li>
+                <li><strong>Processos</strong> — quantidade total</li>
+                <li><strong>Uptime</strong> — tempo desde o boot</li>
+            </ul>
+
+            <h2>Endpoints Atualizados</h2>
+
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Descrição</th>
+                        <th>Mudança</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/metrics</code></td>
+                        <td>Métricas Prometheus</td>
+                        <td>+ métricas de sistema</td>
+                    </tr>
+                    <tr>
+                        <td><code>/status</code></td>
+                        <td>Status detalhado</td>
+                        <td>+ objeto <code>system</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>/health</code></td>
+                        <td>Health check</td>
+                        <td>versão 1.5.0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Exemplo de Saída</h2>
+
+            <pre><code># Métricas de sistema no formato Prometheus
+mengao_system_cpu_percent 15.2
+mengao_system_memory_percent 45.8
+mengao_system_memory_used_mb 1024.5
+mengao_system_memory_total_mb 2048.0
+mengao_system_disk_percent 62.1
+mengao_system_disk_used_gb 120.5
+mengao_system_disk_total_gb 256.0
+mengao_system_network_bytes_sent 1024000
+mengao_system_network_bytes_recv 2048000
+mengao_system_process_count 156
+mengao_system_uptime_seconds 86400.5</code></pre>
+
+            <h2>Por Que Isso Importa</h2>
+
+            <div class="highlight-box">
+                <p>Antes você sabia que sua API tava down, mas não sabia se era problema da aplicação ou do servidor. Agora você vê tudo num lugar só.</p>
+            </div>
+
+            <p>Se o CPU tá em 95%, memória em 90%, e a API começou a dar timeout — o problema não é o código, é infraestrutura. Essa correlação é o que separa monitoramento básico de observabilidade real.</p>
+
+            <h2>Integração com Grafana</h2>
+
+            <p>Como as métricas tão no formato Prometheus, você pode conectar direto num Grafana:</p>
+
+            <pre><code># No prometheus.yml
+scrape_configs:
+  - job_name: 'mengao-monitor'
+    static_configs:
+      - targets: ['localhost:9090']</code></pre>
+
+            <p>Pronto. Dashboard com gráficos de CPU, memória, disco e status das APIs em 5 minutos.</p>
+
+            <h2>Próximos Passos</h2>
+
+            <ul>
+                <li><strong>v1.6</strong> — Autenticação no dashboard</li>
+                <li><strong>v1.7</strong> — Multi-region checks</li>
+                <li><strong>v1.8</strong> — SLA reporting automático</li>
+            </ul>
+
+            <h2>Como Usar</h2>
+
+            <pre><code># Pull da última versão
+git pull origin master
+
+# Rodar
+python main.py
+
+# Ver métricas de sistema
+curl localhost:9090/metrics | grep mengao_system</code></pre>
+
+            <p>O commit tá no GitHub: <a href="https://github.com/Derrota/mengao-monitor/commit/2e98c09" target="_blank">2e98c09</a>.</p>
+
+            <div class="highlight-box">
+                <p><strong>Uma vez Flamengo, sempre Flamengo!</strong> 🔴⚫</p>
+            </div>
+        </article>
+
+        <footer>
+            <p>Feito com <span class="heart">♥</span> e muita atitude pelo Lek</p>
+        </footer>
+    </div>
+</body>
+</html>
