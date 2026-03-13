@@ -98,16 +98,6 @@
         .highlight-box p {
             margin: 0;
         }
-        .warning-box {
-            background: #1a1100;
-            border-left: 3px solid #ffaa00;
-            padding: 20px;
-            margin: 25px 0;
-        }
-        .warning-box p {
-            margin: 0;
-            color: #ffcc00;
-        }
         .back-link {
             display: inline-block;
             color: #ff00ff;
@@ -121,30 +111,35 @@
             background: #ff00ff;
             color: #000;
         }
-        .layer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .rate-limit-table {
+            width: 100%;
+            border-collapse: collapse;
             margin: 20px 0;
         }
-        .layer-card {
-            background: #111;
+        .rate-limit-table th, .rate-limit-table td {
             border: 1px solid #333;
-            padding: 15px;
-            text-align: center;
+            padding: 12px;
+            text-align: left;
         }
-        .layer-card .emoji {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        .layer-card h4 {
+        .rate-limit-table th {
+            background: #1a1a1a;
             color: #00ffff;
-            margin: 0 0 5px;
         }
-        .layer-card p {
-            color: #888;
-            font-size: 0.85rem;
+        .rate-limit-table td {
+            color: #ccc;
+        }
+        .rate-limit-table tr:hover td {
+            background: #111;
+        }
+        .warning-box {
+            background: #1a1a00;
+            border-left: 3px solid #ffaa00;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .warning-box p {
             margin: 0;
+            color: #ffcc00;
         }
     </style>
 </head>
@@ -162,94 +157,167 @@
         </header>
 
         <article class="post-content">
-            <p>Quando seu monitor de APIs detecta que algo caiu, o último problema que você quer é <strong>spam de alertas</strong>. O v1.6 do Mengão Monitor resolve isso com duas features que tavam na minha lista há tempo: <strong>rate limiting</strong> e <strong>retry automático</strong>.</p>
+            <p>Depois do v1.5 com métricas de sistema, o Mengão Monitor ganhou duas features que tavam faltando pra produção real: <strong>rate limiting</strong> e <strong>retry automático</strong>. Porque alerta que não chega é alerta inútil, e alerta que spamma é pior que nenhum alerta.</p>
 
             <h2>O Problema</h2>
             
-            <p>Imagina: sua API dá timeout por 5 segundos. Seu monitor detecta e manda alerta. Mas a API volta. E cai de novo. E volta. Em 1 minuto você recebeu 15 notificações no Discord.</p>
+            <p>Imagina: sua API caiu. O monitor detecta e manda webhook pro Discord. Mas a rede tá instável — o webhook falha. E aí? Você perdeu o alerta. Ou pior: a API fica flipando (up/down/up/down) e você recebe 50 alertas em 5 minutos. Seu canal vira um inferno de notificações.</p>
 
             <div class="warning-box">
-                <p>⚠️ Alert spam é pior que não ter monitoramento. Quando tudo é urgente, nada é urgente.</p>
+                <p>⚠️ <strong>Lições aprendidas na marra:</strong> Webhook sem retry = alerta perdido. Webhook sem rate limit = spam garantido.</p>
             </div>
 
-            <p>O v1.6 resolve isso com camadas de proteção inteligentes.</p>
+            <h2>Rate Limiting (v1.6)</h2>
 
-            <h2>🛡️ Rate Limiting: 5 Camadas de Proteção</h2>
+            <p>Novo módulo <code>rate_limiter.py</code> com proteção em múltiplas camadas:</p>
 
-            <p>O novo módulo <code>rate_limiter.py</code> implementa proteção contra spam em múltiplos níveis:</p>
+            <table class="rate-limit-table">
+                <thead>
+                    <tr>
+                        <th>Camada</th>
+                        <th>Limite</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Por minuto</td>
+                        <td>5 alertas</td>
+                        <td>Evita rajadas instantâneas</td>
+                    </tr>
+                    <tr>
+                        <td>Por hora</td>
+                        <td>30 alertas</td>
+                        <td>Controla volume horário</td>
+                    </tr>
+                    <tr>
+                        <td>Por dia</td>
+                        <td>100 alertas</td>
+                        <td>Limite diário absoluto</td>
+                    </tr>
+                    <tr>
+                        <td>Burst</td>
+                        <td>3 em 60s</td>
+                        <td>Proteção contra flip-flop</td>
+                    </tr>
+                    <tr>
+                        <td>Cooldown</td>
+                        <td>5 min/endpoint</td>
+                        <td>Evita repetição do mesmo alerta</td>
+                    </tr>
+                </tbody>
+            </table>
 
-            <div class="layer-grid">
-                <div class="layer-card">
-                    <div class="emoji">⏱️</div>
-                    <h4>Por Minuto</h4>
-                    <p>Máx 5 alertas/min por endpoint</p>
-                </div>
-                <div class="layer-card">
-                    <div class="emoji">📊</div>
-                    <h4>Por Hora</h4>
-                    <p>Máx 30 alertas/hora por endpoint</p>
-                </div>
-                <div class="layer-card">
-                    <div class="emoji">📅</div>
-                    <h4>Por Dia</h4>
-                    <p>Máx 100 alertas/dia por endpoint</p>
-                </div>
-                <div class="layer-card">
-                    <div class="emoji">💥</div>
-                    <h4>Burst</h4>
-                    <p>Máx 3 alertas em 60 segundos</p>
-                </div>
-                <div class="layer-card">
-                    <div class="emoji">❄️</div>
-                    <h4>Cooldown</h4>
-                    <p>5 min entre alertas do mesmo endpoint</p>
-                </div>
-            </div>
+            <h3>Como Funciona</h3>
 
-            <p>Todas as camadas são <strong>thread-safe</strong> usando <code>Lock</code>, então funciona perfeitamente em produção com múltiplas threads.</p>
+            <pre><code>from rate_limiter import RateLimiter, RateLimitConfig
 
-            <h2>🔄 Retry Automático com Backoff</h2>
+# Configuração customizada
+config = RateLimitConfig(
+    max_alerts_per_minute=5,
+    max_alerts_per_hour=30,
+    burst_limit=3,
+    cooldown_seconds=300
+)
 
-            <p>O <code>webhooks.py</code> foi reescrito do zero. Agora, se um webhook falha, ele tenta de novo automaticamente:</p>
+limiter = RateLimiter(config)
 
-            <pre><code>Tentativa 1 → Falha (timeout) → Espera 1s
-Tentativa 2 → Falha (503)     → Espera 3s  
-Tentativa 3 → Sucesso (200)   → ✅ Alerta entregue</code></pre>
+# Verifica se pode enviar alerta
+if limiter.allow_alert("minha-api"):
+    # Envia webhook
+    webhook_sender.send(result)
+else:
+    # Bloqueado por rate limit
+    logger.warning("Rate limit atingido")</code></pre>
 
-            <h3>Regras Inteligentes</h3>
+            <h3>Thread-Safe</h3>
+
+            <p>O rate limiter usa <code>threading.Lock</code> pra ser seguro em ambientes concorrentes. Se você tiver múltiplas threads checando APIs, o contador não vai ter race conditions.</p>
+
+            <h2>Retry Automático (v1.6)</h2>
+
+            <p>O <code>webhooks.py</code> foi reescrito com retry automático e backoff exponencial:</p>
+
+            <pre><code># Fluxo de retry
+Tentativa 1 → Falha (timeout)
+  ↓ espera 1s
+Tentativa 2 → Falha (500)
+  ↓ espera 3s  
+Tentativa 3 → Falha (connection error)
+  ↓ erro final reportado</code></pre>
+
+            <h3>Configurações</h3>
 
             <ul>
                 <li><strong>3 tentativas</strong> por webhook</li>
-                <li><strong>Backoff exponencial</strong>: 1s → 3s → 5s</li>
-                <li><strong>Timeout de 10s</strong> por request</li>
-                <li><strong>4xx não retry</strong> — erro do cliente, não adianta tentar de novo</li>
-                <li><strong>5xx retry</strong> — erro do servidor, pode ser temporário</li>
+                <li><strong>Backoff</strong>: 1s → 3s → 5s</li>
+                <li><strong>Timeout</strong>: 10s por request</li>
+                <li><strong>4xx</strong>: Não retry (erro do cliente)</li>
+                <li><strong>5xx</strong>: Retry automático (erro do servidor)</li>
             </ul>
 
-            <h2>📊 Novas Métricas</h2>
+            <h3>WebhookResult</h3>
 
-            <p>O v1.6 adiciona métricas de Prometheus para monitorar o próprio monitor:</p>
+            <p>Novo dataclass que retorna detalhes de cada envio:</p>
 
-            <pre><code># Webhooks
-mengao_webhook_sent_total 42
-mengao_webhook_failed_total 3
-mengao_webhook_retries_total 8
+            <pre><code>@dataclass
+class WebhookResult:
+    success: bool
+    platform: str      # "discord", "slack", "telegram"
+    status_code: int   # HTTP status
+    error: str         # mensagem de erro se falhou
+    attempts: int      # quantas tentativas foram feitas</code></pre>
 
-# Rate Limiting
-mengao_rate_limit_allowed_total 156
-mengao_rate_limit_blocked_total 12</code></pre>
+            <h2>Integração</h2>
 
-            <p>Agora você pode criar alertas sobre seus alertas. Meta-monitoring! 🧠</p>
+            <p>Os dois módulos trabalham juntos no fluxo principal:</p>
 
-            <h2>🧪 Testes</h2>
+            <ol>
+                <li>API check detecta status change</li>
+                <li>Rate limiter verifica se pode alertar</li>
+                <li>Se permitido, webhooks enviam com retry</li>
+                <li>Stats são atualizadas (sent, failed, retries, rate_limited)</li>
+            </ol>
 
-            <p>A suite de testes foi atualizada com 50+ testes cobrindo os novos módulos:</p>
+            <h2>Stats Detalhadas</h2>
+
+            <p>O <code>WebhookSender</code> agora tem estatísticas completas:</p>
+
+            <pre><code>stats = webhook_sender.get_stats()
+# {
+#     'sent': 42,
+#     'failed': 3,
+#     'retries': 8,
+#     'cooldown_skipped': 15,
+#     'rate_limited': 2,
+#     'rate_limiter': {
+#         'allowed': 45,
+#         'blocked_minute': 1,
+#         'blocked_hour': 0,
+#         'blocked_day': 0,
+#         'blocked_burst': 1,
+#         'blocked_cooldown': 15
+#     }
+# }</code></pre>
+
+            <h2>Testes</h2>
+
+            <p>Novo arquivo <code>test_v15.py</code> com testes atualizados:</p>
 
             <ul>
-                <li><code>TestRateLimiter</code> — Todas as 5 camadas de rate limiting</li>
-                <li><code>TestWebhooks</code> — Retry logic, backoff, timeout</li>
-                <li><code>TestConfig</code> — Validação de configuração</li>
-                <li><code>TestSystemMetrics</code> — Coleta de métricas de sistema</li>
+                <li>Testes de config (JSON, YAML, defaults, validação)</li>
+                <li>Testes de system metrics (coleta, dict, Prometheus)</li>
+                <li>Testes de webhooks (formatting, cooldown, retry)</li>
+                <li>Testes de rate limiter (limites, burst, reset)</li>
+                <li>Testes de health endpoints</li>
+            </ul>
+
+            <h2>Próximos Passos</h2>
+
+            <ul>
+                <li><strong>v1.7</strong> — Autenticação no dashboard (JWT ou basic auth)</li>
+                <li><strong>v1.8</strong> — Multi-region checks (checar de múltiplos locais)</li>
+                <li><strong>v1.9</strong> — SLA reporting automático (relatórios semanais)</li>
             </ul>
 
             <h2>Como Usar</h2>
@@ -257,29 +325,23 @@ mengao_rate_limit_blocked_total 12</code></pre>
             <pre><code># Pull da última versão
 git pull origin master
 
-# Rodar testes
-pytest test_v15.py -v
+# Configuração com rate limiting
+{
+  "rate_limiting": {
+    "max_alerts_per_minute": 5,
+    "max_alerts_per_hour": 30,
+    "burst_limit": 3
+  }
+}
 
-# Executar
+# Rodar
 python main.py</code></pre>
 
-            <h2>O Que Aprendi</h2>
-
-            <div class="highlight-box">
-                <p>Rate limiting não é só sobre proteger APIs externas. É sobre proteger <strong>você mesmo</strong> do ruído. Um sistema que grita o tempo todo é tão inútil quanto um sistema silencioso.</p>
-            </div>
-
-            <p>Essa feature nasceu de uma dor real: receber 15 notificações porque uma API deu timeout de 2 segundos. Agora o monitor é inteligente o suficiente pra saber quando falar e quando calar a boca.</p>
-
-            <h2>Próximos Passos</h2>
-
+            <p>Commits no GitHub:</p>
             <ul>
-                <li><strong>v1.7</strong> — Autenticação no dashboard</li>
-                <li><strong>v1.8</strong> — Multi-region checks</li>
-                <li><strong>v1.9</strong> — SLA reporting automático</li>
+                <li><a href="https://github.com/Derrota/mengao-monitor/commit/b416adf" target="_blank">b416adf</a> — Rate limiting + retry + testes</li>
+                <li><a href="https://github.com/Derrota/mengao-monitor/commit/8eb9072" target="_blank">8eb9072</a> — README + CI atualizados</li>
             </ul>
-
-            <p>O código tá no GitHub: <a href="https://github.com/Derrota/mengao-monitor" target="_blank">github.com/Derrota/mengao-monitor</a>.</p>
 
             <div class="highlight-box">
                 <p><strong>Uma vez Flamengo, sempre Flamengo!</strong> 🔴⚫</p>
