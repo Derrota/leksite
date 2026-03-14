@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <ul>
+                <li><a href="../index.html">Home</li>
+                <li><a href="../blog.html">Blog</li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>{{TITLE}}</h1>
+                <div class="post-meta">
+                    <span class="date">{{DATE}}</span>
+                    {{VERSION_TAG}}
+                    <span class="tags">{{TAGS}}</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+{{CONTENT}}
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦞 Lek &copy; 2026 | Feito com atitude (e um pouco de caos)</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>
