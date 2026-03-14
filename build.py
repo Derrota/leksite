@@ -1,190 +1,247 @@
 #!/usr/bin/env python3
 """
-Build script para Leksite
-Converte posts Markdown para HTML usando template padrão
+Leksite Build Script
+Converte posts em Markdown para HTML usando template padrão.
+Uso: python3 build.py [--all] [--file content/posts/arquivo.md]
 """
 
 import os
 import re
 import sys
-import glob
+import argparse
 from datetime import datetime
-from pathlib import Path
 
-# Diretórios
-BASE_DIR = Path(__file__).parent
-CONTENT_DIR = BASE_DIR / "content" / "posts"
-POSTS_DIR = BASE_DIR / "posts"
-TEMPLATE_FILE = BASE_DIR / "template.html"
+TEMPLATE_FILE = "template.html"
+CONTENT_DIR = "content/posts"
+OUTPUT_DIR = "posts"
 
-def parse_markdown(file_path):
-    """Parseia arquivo Markdown e extrai metadados + conteúdo"""
-    with open(file_path, 'r', encoding='utf-8') as f:
-        content = f.read()
+def parse_markdown_header(content):
+    """Extrai metadados do header do markdown."""
+    lines = content.split('\n')
+    title = ""
+    date = ""
+    version = ""
+    tags = ""
     
-    # Extrair metadados do frontmatter (se existir)
-    meta = {}
-    if content.startswith('---'):
-        parts = content.split('---', 2)
-        if len(parts) >= 3:
-            frontmatter = parts[1]
-            content = parts[2]
-            
-            # Parsear frontmatter simples
-            for line in frontmatter.strip().split('\n'):
-                if ':' in line:
-                    key, value = line.split(':', 1)
-                    meta[key.strip().lower()] = value.strip()
+    for line in lines[:20]:  # Primeiras 20 linhas
+        if line.startswith('# '):
+            title = line[2:].strip()
+        elif line.startswith('**Data**:'):
+            date = line.split(':', 1)[1].strip().replace('**', '')
+        elif line.startswith('**Versão**:'):
+            version = line.split(':', 1)[1].strip().replace('**', '')
+        elif line.startswith('**Tags**:'):
+            tags = line.split(':', 1)[1].strip().replace('**', '')
     
-    # Converter Markdown para HTML básico
-    html_content = markdown_to_html(content)
-    
-    return meta, html_content
+    return title, date, version, tags
 
-def markdown_to_html(md_text):
-    """Converte Markdown básico para HTML"""
-    lines = md_text.split('\n')
+def markdown_to_html(content):
+    """Conversão básica de Markdown para HTML."""
+    lines = content.split('\n')
     html_lines = []
     in_code_block = False
-    code_lang = ''
+    in_list = False
+    list_type = None
     
-    for line in lines:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        
         # Code blocks
         if line.startswith('```'):
-            if not in_code_block:
-                in_code_block = True
-                code_lang = line[3:].strip()
-                html_lines.append(f'<pre><code class="language-{code_lang}">')
-            else:
-                in_code_block = False
+            if in_code_block:
                 html_lines.append('</code></pre>')
+                in_code_block = False
+            else:
+                lang = line[3:].strip()
+                html_lines.append(f'<pre><code class="language-{lang}">')
+                in_code_block = True
+            i += 1
             continue
         
         if in_code_block:
             html_lines.append(line)
+            i += 1
             continue
         
         # Headers
-        if line.startswith('# '):
-            html_lines.append(f'<h1>{line[2:]}</h1>')
+        if line.startswith('### '):
+            html_lines.append(f'<h3>{line[4:]}</h3>')
         elif line.startswith('## '):
             html_lines.append(f'<h2>{line[3:]}</h2>')
-        elif line.startswith('### '):
-            html_lines.append(f'<h3>{line[4:]}</h3>')
-        elif line.startswith('#### '):
-            html_lines.append(f'<h4>{line[5:]}</h4>')
+        elif line.startswith('# '):
+            # Título principal - já está no header, pular
+            pass
         
-        # Lists
+        # Horizontal rule
+        elif line.startswith('---'):
+            html_lines.append('<hr>')
+        
+        # Blockquote
+        elif line.startswith('> '):
+            html_lines.append(f'<blockquote><p>{line[2:]}</p></blockquote>')
+        
+        # Listas não ordenadas
         elif line.startswith('- '):
+            if not in_list or list_type != 'ul':
+                if in_list:
+                    html_lines.append(f'</{list_type}>')
+                html_lines.append('<ul>')
+                in_list = True
+                list_type = 'ul'
             html_lines.append(f'<li>{line[2:]}</li>')
-        elif line.startswith('* '):
-            html_lines.append(f'<li>{line[2:]}</li>')
         
-        # Bold and italic
-        elif '**' in line:
-            line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', line)
-            html_lines.append(f'<p>{line}</p>')
-        elif '*' in line:
-            line = re.sub(r'\*(.*?)\*', r'<em>\1</em>', line)
-            html_lines.append(f'<p>{line}</p>')
+        # Listas ordenadas
+        elif re.match(r'^\d+\. ', line):
+            if not in_list or list_type != 'ol':
+                if in_list:
+                    html_lines.append(f'</{list_type}>')
+                html_lines.append('<ol>')
+                in_list = True
+                list_type = 'ol'
+            content_match = re.match(r'^\d+\. (.*)', line)
+            html_lines.append(f'<li>{content_match.group(1)}</li>')
         
-        # Links
-        elif '[' in line and '](' in line:
-            line = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', line)
-            html_lines.append(f'<p>{line}</p>')
-        
-        # Empty lines
+        # Linha vazia
         elif line.strip() == '':
+            if in_list:
+                html_lines.append(f'</{list_type}>')
+                in_list = False
+                list_type = None
             html_lines.append('')
         
-        # Regular paragraphs
+        # Parágrafo normal
         else:
-            html_lines.append(f'<p>{line}</p>')
+            if in_list:
+                html_lines.append(f'</{list_type}>')
+                in_list = False
+                list_type = None
+            
+            # Inline formatting
+            processed = line
+            # Bold
+            processed = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', processed)
+            # Italic
+            processed = re.sub(r'\*(.*?)\*', r'<em>\1</em>', processed)
+            # Inline code
+            processed = re.sub(r'`(.*?)`', r'<code>\1</code>', processed)
+            # Links
+            processed = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', processed)
+            
+            html_lines.append(f'<p>{processed}</p>')
+        
+        i += 1
+    
+    if in_list:
+        html_lines.append(f'</{list_type}>')
     
     return '\n'.join(html_lines)
 
-def build_post(md_file):
-    """Converte um arquivo MD para HTML"""
-    print(f"🔨 Building: {md_file.name}")
+def build_post(md_file, template):
+    """Converte um arquivo markdown para HTML."""
+    with open(md_file, 'r', encoding='utf-8') as f:
+        content = f.read()
     
-    # Parsear Markdown
-    meta, content = parse_markdown(md_file)
+    title, date, version, tags = parse_markdown_header(content)
     
-    # Ler template
+    # Remove header lines do conteúdo para conversão
+    lines = content.split('\n')
+    content_lines = []
+    skip_header = True
+    for line in lines:
+        if skip_header:
+            if line.startswith('# '):
+                continue
+            elif line.startswith('**'):
+                continue
+            elif line.strip() == '---':
+                skip_header = False
+                continue
+        content_lines.append(line)
+    
+    clean_content = '\n'.join(content_lines)
+    html_content = markdown_to_html(clean_content)
+    
+    # Substitui placeholders no template
+    output = template
+    output = output.replace('{{TITLE}}', title)
+    output = output.replace('{{DATE}}', date)
+    output = output.replace('{{TAGS}}', tags)
+    
+    if version:
+        version_tag = f'<span class="version">{version}</span>'
+    else:
+        version_tag = ''
+    output = output.replace('{{VERSION_TAG}}', version_tag)
+    
+    output = output.replace('{{CONTENT}}', html_content)
+    
+    return output, title
+
+def main():
+    parser = argparse.ArgumentParser(description='Build Leksite posts')
+    parser.add_argument('--all', action='store_true', help='Build all posts')
+    parser.add_argument('--file', type=str, help='Build specific file')
+    args = parser.parse_args()
+    
+    # Carrega template
     with open(TEMPLATE_FILE, 'r', encoding='utf-8') as f:
         template = f.read()
     
-    # Preparar metadados
-    title = meta.get('title', md_file.stem.replace('-', ' ').title())
-    date = meta.get('date', datetime.now().strftime('%Y-%m-%d'))
-    tags = meta.get('tags', 'python, monitoring')
-    version = meta.get('version', '')
+    if args.all:
+        # Build todos os posts
+        if not os.path.exists(CONTENT_DIR):
+            print(f"❌ Diretório {CONTENT_DIR} não encontrado")
+            sys.exit(1)
+        
+        md_files = [f for f in os.listdir(CONTENT_DIR) if f.endswith('.md')]
+        
+        if not md_files:
+            print(f"❌ Nenhum arquivo .md encontrado em {CONTENT_DIR}")
+            sys.exit(1)
+        
+        print(f"🔨 Building {len(md_files)} posts...")
+        
+        for md_file in md_files:
+            md_path = os.path.join(CONTENT_DIR, md_file)
+            html_file = md_file.replace('.md', '.html')
+            html_path = os.path.join(OUTPUT_DIR, html_file)
+            
+            try:
+                html_content, title = build_post(md_path, template)
+                
+                with open(html_path, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                
+                print(f"✅ {md_file} → {html_file} ({title})")
+            except Exception as e:
+                print(f"❌ Erro em {md_file}: {e}")
+        
+        print(f"\n🎉 Build completo! Posts em {OUTPUT_DIR}/")
     
-    # Substituir placeholders no template
-    html = template.replace('{{title}}', title)
-    html = html.replace('{{date}}', date)
-    html = html.replace('{{tags}}', tags)
-    html = html.replace('{{content}}', content)
-    
-    if version:
-        version_html = f'<span>🔖 v{version}</span>'
-        html = html.replace('{{version}}', version_html)
-    else:
-        html = html.replace('{{version}}', '')
-    
-    # Nome do arquivo de saída
-    output_name = md_file.stem + '.html'
-    output_path = POSTS_DIR / output_name
-    
-    # Salvar HTML
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(html)
-    
-    print(f"✅ Built: {output_name}")
-    return output_path
-
-def main():
-    """Função principal"""
-    print("🚀 Leksite Build Script")
-    print("=" * 50)
-    
-    # Verificar se diretório de conteúdo existe
-    if not CONTENT_DIR.exists():
-        print(f"📁 Criando diretório: {CONTENT_DIR}")
-        CONTENT_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Encontrar todos os arquivos MD
-    md_files = list(CONTENT_DIR.glob('*.md'))
-    
-    if not md_files:
-        print("⚠️  Nenhum arquivo .md encontrado em content/posts/")
-        print("💡 Crie posts em: content/posts/seu-post.md")
-        return
-    
-    print(f"📄 Encontrados {len(md_files)} posts para buildar:")
-    for md in md_files:
-        print(f"  - {md.name}")
-    
-    print("\n🔨 Iniciando build...")
-    
-    # Buildar cada post
-    built_files = []
-    for md_file in md_files:
+    elif args.file:
+        # Build arquivo específico
+        if not os.path.exists(args.file):
+            print(f"❌ Arquivo {args.file} não encontrado")
+            sys.exit(1)
+        
+        md_file = os.path.basename(args.file)
+        html_file = md_file.replace('.md', '.html')
+        html_path = os.path.join(OUTPUT_DIR, html_file)
+        
         try:
-            output = build_post(md_file)
-            built_files.append(output)
+            html_content, title = build_post(args.file, template)
+            
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            print(f"✅ {md_file} → {html_file} ({title})")
         except Exception as e:
-            print(f"❌ Erro ao buildar {md_file.name}: {e}")
+            print(f"❌ Erro: {e}")
     
-    print("\n" + "=" * 50)
-    print(f"✅ Build completo! {len(built_files)} posts gerados:")
-    for f in built_files:
-        print(f"  - {f.name}")
-    
-    print("\n💡 Próximos passos:")
-    print("  1. Adicione cards no blog.html")
-    print("  2. git add . && git commit && git push")
-    print("  3. Deploy automático na Vercel")
+    else:
+        print("Uso: python3 build.py --all | --file content/posts/arquivo.md")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
