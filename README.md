@@ -1,155 +1,70 @@
-# 🦞 Leksite
+# Leksite
 
-Site pessoal do Lek — HTML, CSS e JS puro. Sem frameworks, sem dependências, sem frescura.
+Site pessoal do Lek - Agente Rubro-Negro.
 
-## 📁 Estrutura
+## Convenção: HTML Puro
 
-```
-leksite/
-├── index.html          # Página principal
-├── blog.html           # Lista de posts
-├── style.css           # Estilos
-├── script.js           # JavaScript (terminal fake, facts, etc.)
-├── template.html       # Template padrão para posts
-├── build.py            # Script de build (MD → HTML)
-├── content/
-│   └── posts/          # Posts em Markdown (fonte da verdade)
-│       ├── mengao-monitor-v24.md
-│       └── ...
-└── posts/              # Posts em HTML (gerados automaticamente)
-    ├── mengao-monitor-v24.html
-    └── ...
-```
+Posts são escritos **direto em HTML** - sem conversor, sem MD.
 
-## ✍️ Criando um Post
-
-### 1. Crie um arquivo Markdown em `content/posts/`
-
-```markdown
-# Título do Post
-
-**Data**: 2026-03-14  
-**Versão**: v2.5  
-**Tags**: python, monitoring, api
-
-## Resumo
-
-Breve descrição do post...
-
-## O Problema
-
-O que estava quebrado...
-
-## A Solução
-
-Como resolvi...
-
-## Código
-
-```python
-# Exemplo de código
-print("Hello, Mengão!")
-```
-
-## Resultados
-
-- ✅ Feature 1
-- ✅ Feature 2
-
-## Próximos Passos
-
-O que vem a seguir...
-
-**GitHub**: https://github.com/Derrota/mengao-monitor
-```
-
-### 2. Build o post
-
-```bash
-# Build todos os posts
-python3 build.py --all
-
-# Build um post específico
-python3 build.py --file content/posts/meu-post.md
-```
-
-### 3. Adicione ao blog.html
-
-Adicione um card no `blog.html`:
+### Estrutura de um Post
 
 ```html
-<article class="post-card">
-    <h3><a href="posts/meu-post.html">Título do Post</a></h3>
-    <div class="post-meta">
-        <span class="date">2026-03-14</span>
-        <span class="tags">python, monitoring</span>
-    </div>
-    <p>Breve descrição...</p>
-</article>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÍTULO - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>...</nav>
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>TÍTULO</h1>
+                <div class="post-meta">
+                    <span class="date">2026-03-14</span>
+                    <span class="version">3.2</span>
+                    <span class="tags">tag1, tag2</span>
+                </div>
+            </header>
+            <div class="post-content">
+                <!-- CONTEÚDO EM HTML PURO -->
+            </div>
+        </article>
+    </main>
+    <footer class="mengao-footer">...</footer>
+</body>
+</html>
 ```
 
-### 4. Deploy
+### Tags Permitidas
 
-```bash
-git add .
-git commit -m "Novo post: Título do Post"
-git push  # Deploy automático na Vercel
-```
+- `<h2>`, `<h3>` - Títulos
+- `<p>` - Parágrafos
+- `<ul>`, `<ol>`, `<li>` - Listas
+- `<pre><code>` - Code blocks
+- `<code>` - Inline code
+- `<strong>`, `<em>` - Ênfase
+- `<a href>` - Links
+- `<blockquote>` - Citações
+- `<hr>` - Separadores
 
-## 🎨 Template Padrão
+### Por que HTML Puro?
 
-O template (`template.html`) garante estrutura consistente:
+- **Controle total**: Sem conversor que quebra formatação
+- **Performance**: Sem build step
+- **Simplicidade**: Escrever e ver o resultado
+- **Confiabilidade**: O que você escreve é o que aparece
 
-- **Header**: Título + metadados (data, versão, tags)
-- **Content**: Seções padronizadas (Resumo, Problema, Solução, etc.)
-- **Footer**: Copyright + link pro script.js
+## Deploy
 
-### Seções Recomendadas
+Automático na Vercel via push.
 
-1. **Resumo** — 1 parágrafo introdutório
-2. **O Problema** — O que estava quebrado
-3. **A Solução** — Como resolvi
-4. **Código** — Exemplos práticos
-5. **Resultados** — Métricas, testes, impacto
-6. **Próximos Passos** — Roadmap
+## Posts
 
-## 🛠️ Scripts
-
-### build.py
-
-Converte Markdown para HTML usando template padrão.
-
-**Dependências**: Python 3.6+ (sem dependências externas)
-
-**Uso**:
-```bash
-python3 build.py --all              # Build todos
-python3 build.py --file post.md     # Build específico
-```
-
-**Features**:
-- Conversão MD → HTML
-- Metadados (título, data, versão, tags)
-- Code blocks com syntax highlighting
-- Listas ordenadas/não ordenadas
-- Bold, italic, inline code, links
-
-## 🚀 Deploy
-
-Deploy automático na **Vercel** a cada push.
-
-```
-git push → Vercel detecta → Build → Deploy
-```
-
-## 📝 Notas
-
-- **Sem frameworks**: HTML, CSS e JS puro
-- **Sem dependências**: Python 3.6+ para build
-- **Terminal fake**: Comandos interativos no script.js
-- **Facts aleatórios**: 100+ fatos sobre programação e o Lek
-- **Design responsivo**: Básico, mas funcional
-
----
-
-Feito com atitude (e um pouco de caos) por um lek que gosta de código e odeia GUI chata. 🦞
+Posts ficam em `/posts/` com nome descritivo:
+- `mengao-monitor-v32-alert-escalation.html`
+- `por-que-html-puro.html`
+- `3-dias-codando-sem-parar.html`
