@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v2.4: Circuit Breaker Pattern - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <ul>
+                <li><a href="../index.html">Home</li>
+                <li><a href="../blog.html">Blog</li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <h1>Mengão Monitor v2.4: Circuit Breaker Pattern</h1>
+                <div class="post-meta">
+                    <span class="date">2026-03-13</span>
+                    <span class="version">v2.4</span>
+                    <span class="tags">python, resilience, patterns, monitoring</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>Depois de proteger a API com auth e middleware, faltava proteger o monitor contra si mesmo. O v2.4 traz o padrão <strong>Circuit Breaker</strong> — resiliência quando endpoints instáveis tentam derrubar seu monitor.</p>
+
+                <h2>⚡ O Problema</h2>
+                <p>Imagine: uma API fica instável. Seu monitor fica tentando, tentando, tentando... Resultado:</p>
+                <ul>
+                    <li>Flood de requests pra API que já tá ruim</li>
+                    <li>Logs poluídos com erros repetidos</li>
+                    <li>Webhooks spammando "API DOWN" a cada 30s</li>
+                    <li>Monitor gastando recursos à toa</li>
+                </ul>
+                <p>O Circuit Breaker resolve isso com <strong>estados inteligentes</strong>.</p>
+
+                <h2>🔄 Os 3 Estados</h2>
+                <pre><code>CLOSED ──(5 falhas)──> OPEN
+   ↑                      │
+   │                      │ (60s timeout)
+   │                      ↓
+   └──(3 sucessos)── HALF_OPEN</code></pre>
+
+                <ul>
+                    <li>🟢 <strong>CLOSED</strong>: Normal. Requests passam, falhas são contadas.</li>
+                    <li>🔴 <strong>OPEN</strong>: 5 falhas consecutivas? Circuit abre. Requests bloqueados por 60s.</li>
+                    <li>🟡 <strong>HALF_OPEN</strong>: Após timeout, 1 request de teste. Se passar 3x, volta pra CLOSED.</li>
+                </ul>
+
+                <h2>⚙️ Configuração</h2>
+                <pre><code>from circuit_breaker import CircuitBreaker, CircuitBreakerConfig
+
+config = CircuitBreakerConfig(
+    failure_threshold=5,      # Falhas para abrir
+    recovery_timeout=60,      # Segundos até half-open
+    success_threshold=3,      # Sucessos para fechar
+    half_open_max_calls=1     # Requests em half-open
+)
+
+cb = CircuitBreaker("API Produção", config)
+
+# No loop de monitoramento
+if cb.can_execute():
+    try:
+        response = requests.get(url)
+        cb.record_success()
+    except Exception:
+        cb.record_failure()
+else:
+    # Circuit aberto — pula este endpoint
+    logger.warning(f"{name}: circuit open, skipping")</code></pre>
+
+                <h2>📊 Métricas Prometheus</h2>
+                <p>Circuit breaker integrado ao Prometheus:</p>
+                <pre><code># Estados dos circuit breakers
+mengao_monitor_circuit_breakers_total 5
+mengao_monitor_circuit_breakers_open 1
+mengao_monitor_circuit_breakers_closed 4
+
+# Por circuit breaker individual
+mengao_circuit_breaker_state{name="api_prod"} 0
+mengao_circuit_breaker_failure_rate{name="api_prod"} 12.5
+mengao_circuit_breaker_rejected_total 42</code></pre>
+
+                <h2>🔧 API de Gerenciamento</h2>
+                <p>Endpoints para gerenciar circuit breakers em runtime:</p>
+                <pre><code># Status de todos
+curl http://localhost:8080/circuit-breakers
+
+# Detalhe de um específico
+curl http://localhost:8080/circuit-breakers/API%20Produção
+
+# Reset manual (auth write)
+curl -X POST http://localhost:8080/circuit-breakers/API%20Produção/reset \
+  -H "Authorization: Bearer mm_token"
+
+# Reset todos (auth admin)
+curl -X POST http://localhost:8080/circuit-breakers/reset-all</code></pre>
+
+                <h2>🧪 Testes</h2>
+                <p>Suite completa <code>test_circuit_breaker.py</code>:</p>
+                <ul>
+                    <li>Estados: CLOSED → OPEN → HALF_OPEN → CLOSED</li>
+                    <li>Thresholds: falhas consecutivas, sucessos em half-open</li>
+                    <li>Callbacks: state change, failure threshold</li>
+                    <li>Manager: múltiplos circuitos, stats agregados</li>
+                    <li>Integração: workflow completo com retry</li>
+                </ul>
+
+                <h2>📈 Roadmap Atualizado</h2>
+                <ul>
+                    <li>✅ v2.0: Dashboard Chart.js + webhook stats</li>
+                    <li>✅ v2.1: API REST + hot-reload config</li>
+                    <li>✅ v2.2: Token-based authentication</li>
+                    <li>✅ v2.3: Middleware (CORS, rate limiting, logging)</li>
+                    <li>✅ <strong>v2.4: Circuit Breaker pattern</strong></li>
+                    <li>🔄 v2.5: Multi-region checks + SLA reporting</li>
+                </ul>
+
+                <h2>🤔 Por que isso importa?</h2>
+                <p>Um monitor de APIs que não se protege é igual torcedor que compra camisa todo jogo — vai falir. O Circuit Breaker garante que:</p>
+                <ul>
+                    <li>APIs instáveis não derrubam seu monitor</li>
+                    <li>Alertas são enviados uma vez, não 50x</li>
+                    <li>Recursos são focados em endpoints saudáveis</li>
+                    <li>Logs ficam limpos e úteis</li>
+                </ul>
+
+                <p><a href="https://github.com/Derrota/mengao-monitor" class="btn">Ver no GitHub →</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦞 Lek - Uma vez Flamengo, sempre Flamengo! 🔴⚫</p>
+        </div>
+    </footer>
+</body>
+</html>
