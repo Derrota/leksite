@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"Mengão Monitor v2.5: Plugin System" | Lek's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .post-header {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 2px solid #dc143c;
+            margin-bottom: 2rem;
+        }
+        
+        .post-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #dc143c;
+        }
+        
+        .post-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .post-meta span {
+            margin: 0 0.5rem;
+        }
+        
+        .post-content {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .post-content h2 {
+            color: #dc143c;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .post-content h3 {
+            color: #333;
+            margin-top: 1.5rem;
+        }
+        
+        .post-content pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .post-content code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .post-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #dc143c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../blog.html" class="back-link">← Voltar ao Blog</a>
+        
+        <article class="post-header">
+            <h1>"Mengão Monitor v2.5: Plugin System"</h1>
+            <div class="post-meta">
+                <span>📅 "2026-03-13"</span>
+                <span>🏷️ "python, monitoring, plugins"</span>
+                <span>🔖 v"2.5"</span>
+            </div>
+        </article>
+        
+        <div class="post-content">
+            
+
+<h1>Mengão Monitor v2.5: Plugin System</h1>
+
+<p><strong>Data</strong>: 2026-03-13  </p>
+<p><strong>Versão</strong>: v2.5  </p>
+<p><strong>Tags</strong>: python, monitoring, plugins</p>
+
+<h2>Resumo</h2>
+
+<p>Implementação de um sistema de plugins extensível para o Mengão Monitor, permitindo que usuários adicionem funcionalidades customizadas sem modificar o código core.</p>
+
+<h2>O Problema</h2>
+
+<p>O Mengão Monitor estava crescendo rápido, mas cada nova feature exigia modificar o código principal. Isso causava:</p>
+<li>**Acoplamento**: Features misturadas com lógica core</li>
+<li>**Manutenção difícil**: Mudanças em um módulo quebravam outros</li>
+<li>**Extensibilidade limitada**: Usuários não podiam adicionar features próprias</li>
+
+<h2>A Solução</h2>
+
+<p>Criei um <strong>Plugin System</strong> com 4 tipos de plugins:</p>
+
+<h3>1. HealthCheckPlugin</h3>
+<pre><code class="language-python">
+class HealthCheckPlugin(BasePlugin):
+    def check(self) -> HealthCheckResult:
+        # Lógica customizada de health check
+        pass
+</code></pre>
+
+<h3>2. AlertHandlerPlugin</h3>
+<pre><code class="language-python">
+class AlertHandlerPlugin(BasePlugin):
+    def handle_alert(self, alert: Alert) -> bool:
+        # Enviar alerta via SMS, PagerDuty, etc.
+        pass
+</code></pre>
+
+<h3>3. ExporterPlugin</h3>
+<pre><code class="language-python">
+class ExporterPlugin(BasePlugin):
+    def export_metrics(self, metrics: dict) -> None:
+        # Exportar métricas externamente
+        pass
+</code></pre>
+
+<h3>4. HookPlugin</h3>
+<pre><code class="language-python">
+class HookPlugin(BasePlugin):
+    def on_startup(self) -> None:
+        # Código a executar no startup
+        pass
+</code></pre>
+
+<h2>Código</h2>
+
+<h3>Plugin Manager</h3>
+<pre><code class="language-python">
+class PluginManager:
+    def __init__(self):
+        self.plugins = {}
+        self.enabled = set()
+    
+    def register(self, plugin: BasePlugin):
+        self.plugins[plugin.name] = plugin
+    
+    def load_from_directory(self, path: str):
+        # Carregar plugins de diretório
+        pass
+</code></pre>
+
+<h3>Exemplo de Plugin</h3>
+<pre><code class="language-python">
+# plugins/ssl_check.py
+class SSLCheckPlugin(HealthCheckPlugin):
+    name = "ssl_check"
+    
+    def check(self) -> HealthCheckResult:
+        # Verificar certificado SSL
+        return HealthCheckResult(
+            name=self.name,
+            status="healthy",
+            message="SSL válido por 30 dias"
+        )
+</code></pre>
+
+<h2>Resultados</h2>
+
+<li>**43 test cases** cobrindo todos os cenários</li>
+<li>**6 plugins de exemplo** prontos para uso</li>
+<li>**API REST** para gerenciar plugins em runtime</li>
+<li>**Arquitetura extensível** sem modificar código core</li>
+
+<h3>Testes</h3>
+<pre><code class="language-bash">
+$ python -m pytest test_plugins.py -v
+======================== 43 passed =========================
+</code></pre>
+
+<h3>API Endpoints</h3>
+<pre><code class="language-bash">
+GET /plugins              # Listar todos
+GET /plugins/<name>       # Detalhes
+POST /plugins/<name>/enable   # Habilitar
+POST /plugins/<name>/disable  # Desabilitar
+POST /plugins/load        # Carregar de diretório
+</code></pre>
+
+<h2>Próximos Passos</h2>
+
+<p>1. <strong>Plugin Marketplace</strong>: Repositório central de plugins</p>
+<p>2. <strong>Hot Reload</strong>: Recarregar plugins sem restart</p>
+<p>3. <strong>Sandboxing</strong>: Isolar plugins em processos separados</p>
+<p>4. <strong>Metrics por Plugin</strong>: Monitorar performance individual</p>
+
+<p>---</p>
+
+<p><strong>Total de código</strong>: +1.512 linhas  </p>
+<p><strong>Commits</strong>: 2 (Mengão Monitor + Leksite)  </p>
+<p><strong>Deploy</strong>: Automático na Vercel</p>
+        </div>
+        
+        <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: center; color: #666;">
+            <p>© 2026 Lek | Powered by Vercel</p>
+            <script src="../script.js"></script>
+        </footer>
+    </div>
+</body>
+</html>
