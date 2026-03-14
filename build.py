@@ -15,28 +15,53 @@ TEMPLATE_FILE = "template.html"
 CONTENT_DIR = "content/posts"
 OUTPUT_DIR = "posts"
 
-def parse_markdown_header(content):
-    """Extrai metadados do header do markdown."""
-    lines = content.split('\n')
+def parse_frontmatter(content):
+    """Extrai metadados do frontmatter YAML ou formato antigo."""
     title = ""
     date = ""
     version = ""
     tags = ""
     
-    for line in lines[:20]:  # Primeiras 20 linhas
+    # Procura por frontmatter YAML entre ---
+    if content.startswith('---'):
+        end = content.find('---', 3)
+        if end > 0:
+            frontmatter = content[3:end].strip()
+            for line in frontmatter.split('\n'):
+                line = line.strip()
+                if line.startswith('title:'):
+                    title = line.split(':', 1)[1].strip().strip('"\'')
+                elif line.startswith('date:'):
+                    date = line.split(':', 1)[1].strip().strip('"\'')
+                elif line.startswith('version:'):
+                    version = line.split(':', 1)[1].strip().strip('"\'')
+                elif line.startswith('tags:'):
+                    tags = line.split(':', 1)[1].strip().strip('"\'')
+            return title, date, version, tags
+    
+    # Formato antigo: **Data**: ... **Versão**: ... **Tags**: ...
+    lines = content.split('\n')
+    for line in lines[:20]:
+        line = line.strip()
         if line.startswith('# '):
             title = line[2:].strip()
         elif line.startswith('**Data**:'):
-            date = line.split(':', 1)[1].strip().replace('**', '')
+            date = line.split(':', 1)[1].strip().replace('**', '').strip()
         elif line.startswith('**Versão**:'):
-            version = line.split(':', 1)[1].strip().replace('**', '')
+            version = line.split(':', 1)[1].strip().replace('**', '').strip()
         elif line.startswith('**Tags**:'):
-            tags = line.split(':', 1)[1].strip().replace('**', '')
+            tags = line.split(':', 1)[1].strip().replace('**', '').strip()
     
     return title, date, version, tags
 
 def markdown_to_html(content):
     """Conversão básica de Markdown para HTML."""
+    # Remove frontmatter
+    if content.startswith('---'):
+        end = content.find('---', 3)
+        if end > 0:
+            content = content[end+3:].strip()
+    
     lines = content.split('\n')
     html_lines = []
     in_code_block = False
@@ -142,24 +167,23 @@ def build_post(md_file, template):
     with open(md_file, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    title, date, version, tags = parse_markdown_header(content)
+    title, date, version, tags = parse_frontmatter(content)
     
-    # Remove header lines do conteúdo para conversão
-    lines = content.split('\n')
-    content_lines = []
-    skip_header = True
-    for line in lines:
-        if skip_header:
-            if line.startswith('# '):
-                continue
-            elif line.startswith('**'):
-                continue
-            elif line.strip() == '---':
-                skip_header = False
-                continue
-        content_lines.append(line)
+    # Remove frontmatter e título H1 do conteúdo para conversão
+    clean_content = content
     
-    clean_content = '\n'.join(content_lines)
+    # Remove frontmatter
+    if clean_content.startswith('---'):
+        end = clean_content.find('---', 3)
+        if end > 0:
+            clean_content = clean_content[end+3:].strip()
+    
+    # Remove título H1 se existir
+    lines = clean_content.split('\n')
+    if lines and lines[0].startswith('# '):
+        lines = lines[1:]
+    clean_content = '\n'.join(lines)
+    
     html_content = markdown_to_html(clean_content)
     
     # Substitui placeholders no template

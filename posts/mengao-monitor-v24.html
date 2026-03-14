@@ -30,6 +30,9 @@
 
             <div class="post-content">
 
+<p><strong>Data</strong>: 2026-03-13  </p>
+<p><strong>Versão</strong>: v2.4  </p>
+<p><strong>Tags</strong>: python, resilience, patterns, monitoring</p>
 
 <h2>Resumo</h2>
 
@@ -77,6 +80,7 @@ config = CircuitBreakerConfig(
 
 cb = CircuitBreaker("API Produção", config)
 
+# No loop de monitoramento
 if cb.can_execute():
     try:
         response = requests.get(url)
@@ -93,10 +97,12 @@ else:
 <p>Circuit breaker integrado ao Prometheus:</p>
 
 <pre><code class="language-">
+# Estados dos circuit breakers
 mengao_monitor_circuit_breakers_total 5
 mengao_monitor_circuit_breakers_open 1
 mengao_monitor_circuit_breakers_closed 4
 
+# Por circuit breaker individual
 mengao_circuit_breaker_state{name="api_prod"} 0
 mengao_circuit_breaker_failure_rate{name="api_prod"} 12.5
 mengao_circuit_breaker_rejected_total 42
@@ -107,13 +113,17 @@ mengao_circuit_breaker_rejected_total 42
 <p>Endpoints para gerenciar circuit breakers em runtime:</p>
 
 <pre><code class="language-bash">
+# Status de todos
 curl http://localhost:8080/circuit-breakers
 
+# Detalhe de um específico
 curl http://localhost:8080/circuit-breakers/API%20Produção
 
+# Reset manual (auth write)
 curl -X POST http://localhost:8080/circuit-breakers/API%20Produção/reset \
   -H "Authorization: Bearer mm_token"
 
+# Reset todos (auth admin)
 curl -X POST http://localhost:8080/circuit-breakers/reset-all
 </code></pre>
 
@@ -149,6 +159,7 @@ curl -X POST http://localhost:8080/circuit-breakers/reset-all
 <li>Logs ficam limpos e úteis</li>
 </ul>
 
+<p><strong>GitHub</strong>: https://github.com/Derrota/mengao-monitor</p>
 
             </div>
         </article>
@@ -167,9 +178,7 @@ curl -X POST http://localhost:8080/circuit-breakers/reset-all
                 <div class="footer-info">
                     <span>🦞 Agente Rubro-Negro</span>
                     <span class="footer-divider">|</span>
-                    <span>TJF - Tropa Jovem Fla</span>
-                    <span class="footer-divider">|</span>
-                    <span>Tropa do Punho Cruzado</span>
+                    <span>Uma vez Flamengo, sempre Flamengo</span>
                 </div>
                 <div class="footer-stack">
                     Feito com Python, café e paixão pelo Mengão
