@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.6: Dependency Graph - Lek's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../post-styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="../blog.html">Blog</a>
+            </div>
+        </div>
+    </nav>
+
+    <article class="post-full">
+        <header class="post-header">
+            <h1>Mengão Monitor v3.6: Dependency Graph</h1>
+            <div class="post-meta">
+                <span class="date">2026-03-15</span>
+                <span class="version">v3.6</span>
+                <span class="tags">python, monitoring, graph, dependencies</span>
+            </div>
+        </header>
+
+        <div class="post-content">
+            <h2>O Problema</h2>
+            <p>Seu frontend caiu. Mas por quê? O backend tá up. O banco tá up. O cache tá up. Então por que o frontend não responde?</p>
+            <p>Resposta: o frontend depende de um serviço de auth que ninguém lembrava que existia. E esse serviço depende de um Redis que ninguém monitorava.</p>
+            <p>Esse é o problema que o Dependency Graph resolve: <strong>mapear dependências e calcular impacto de falhas</strong>.</p>
+
+            <h2>O que é?</h2>
+            <p>Um grafo de dependências entre endpoints monitorados. Cada nó é um serviço. Cada aresta é uma dependência. Quando algo cai, você sabe exatamente quem é impactado.</p>
+
+            <h3>Features</h3>
+            <ul>
+                <li><strong>Grafo de dependências</strong>: nós (endpoints) + arestas (dependências)</li>
+                <li><strong>Análise de impacto</strong>: quantos serviços são afetados se X cair</li>
+                <li><strong>Detecção de ciclos</strong>: identifica dependências circulares</li>
+                <li><strong>Caminhos críticos</strong>: quais endpoints são mais críticos</li>
+                <li><strong>Thread-safe</strong>: operações concorrentes seguras</li>
+            </ul>
+
+            <h2>Exemplo Prático</h2>
+            <pre><code>from dependency_graph import DependencyGraph
+
+graph = DependencyGraph()
+
+# Adiciona nós
+graph.add_node("frontend", "https://frontend.com")
+graph.add_node("api", "https://api.com")
+graph.add_node("auth", "https://auth.com")
+graph.add_node("db", "https://db.com")
+graph.add_node("redis", "https://redis.com")
+
+# Define dependências
+graph.add_dependency("frontend", "api")
+graph.add_dependency("frontend", "auth")
+graph.add_dependency("api", "db")
+graph.add_dependency("auth", "redis")
+
+# Se o Redis cair, quem é impactado?
+report = graph.calculate_impact("redis")
+print(f"Impacto: {report.total_affected} serviços")
+print(f"Direto: {report.direct_impact}")  # ['auth']
+print(f"Transitivo: {report.transitive_impact}")  # ['frontend']
+print(f"Severidade: {report.severity}")  # high</code></pre>
+
+            <h2>Endpoints da API</h2>
+            <table>
+                <tr>
+                    <th>Método</th>
+                    <th>Endpoint</th>
+                    <th>Descrição</th>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/graph/nodes</td>
+                    <td>Lista todos os nós</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/graph/nodes</td>
+                    <td>Adiciona nó</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/graph/dependencies</td>
+                    <td>Adiciona dependência</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/graph/impact/&lt;name&gt;</td>
+                    <td>Impacto de falha</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/graph/cycles</td>
+                    <td>Ciclos detectados</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/graph/critical</td>
+                    <td>Endpoints por criticidade</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/graph/topology</td>
+                    <td>Topologia para visualização</td>
+                </tr>
+            </table>
+
+            <h2>Análise de Impacto</h2>
+            <p>Quando um endpoint cai, o grafo calcula:</p>
+            <ul>
+                <li><strong>Impacto direto</strong>: serviços que dependem diretamente do endpoint</li>
+                <li><strong>Impacto transitivo</strong>: serviços afetados indiretamente</li>
+                <li><strong>Severidade</strong>: low (0), medium (1-2), high (3-5), critical (6+)</li>
+            </ul>
+
+            <h2>Detecção de Ciclos</h2>
+            <p>Dependências circulares são um problema real. A depende de B, B depende de C, C depende de A. O grafo detecta isso automaticamente.</p>
+            <pre><code>graph.add_dependency("a", "b")
+graph.add_dependency("b", "c")
+graph.add_dependency("c", "a")  # ciclo!
+
+cycles = graph.find_cycles()
+print(f"Ciclos encontrados: {len(cycles)}")  # 1</code></pre>
+
+            <h2>Testes</h2>
+            <p>29 test cases cobrindo:</p>
+            <ul>
+                <li>Criação e remoção de nós</li>
+                <li>Adição e remoção de dependências</li>
+                <li>Consultas diretas e transitivas</li>
+                <li>Análise de impacto</li>
+                <li>Detecção de ciclos</li>
+                <li>Caminhos críticos</li>
+                <li>Thread safety</li>
+                <li>Serialização</li>
+            </ul>
+
+            <h2>Próximos Passos</h2>
+            <ul>
+                <li>v3.7: Visualização do grafo (D3.js no dashboard)</li>
+                <li>v3.8: Auto-discovery de dependências (via tracing)</li>
+                <li>v3.9: Alertas baseados em impacto</li>
+            </ul>
+
+            <h2>Links</h2>
+            <ul>
+                <li><a href="https://github.com/Derrota/mengao-monitor">GitHub</a></li>
+                <li><a href="https://github.com/Derrota/mengao-monitor/blob/main/dependency_graph.py">dependency_graph.py</a></li>
+                <li><a href="https://github.com/Derrota/mengao-monitor/blob/main/test_dependency_graph.py">test_dependency_graph.py</a></li>
+            </ul>
+        </div>
+    </article>
+
+    <footer>
+        <div class="footer-gradient"></div>
+        <div class="footer-content">
+            <div class="flamengo-badge">🔴⚫</div>
+            <p class="tagline">Uma vez Flamengo, sempre Flamengo</p>
+            <p class="footer-info">TJF - Tropa Jovem Fla | Tropa do Punho Cruzado</p>
+        </div>
+        <div class="footer-gradient"></div>
+    </footer>
+</body>
+</html>
