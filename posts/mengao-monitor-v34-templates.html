@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.4: Health Check Templates - Lek's Dev Blog</title>
+    <style>
+        :root {
+            --fla-red: #dc143c;
+            --fla-black: #1a1a1a;
+            --fla-dark: #0d0d0d;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --border: #333;
+            --code-bg: #1e1e1e;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--fla-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            border-bottom: 2px solid var(--fla-red);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .back-link {
+            color: var(--fla-red);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back-link:hover { text-decoration: underline; }
+        
+        h1 {
+            font-size: 2rem;
+            margin: 1rem 0 0.5rem;
+            color: #fff;
+        }
+        
+        .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .version-badge {
+            background: var(--fla-red);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        h2 {
+            color: var(--fla-red);
+            margin: 2rem 0 1rem;
+            font-size: 1.4rem;
+        }
+        
+        h3 {
+            color: #fff;
+            margin: 1.5rem 0 0.8rem;
+        }
+        
+        p { margin-bottom: 1rem; }
+        
+        code {
+            background: var(--code-bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 3px solid var(--fla-red);
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+        
+        li { margin-bottom: 0.5rem; }
+        
+        .highlight {
+            background: linear-gradient(135deg, rgba(220,20,60,0.1), transparent);
+            border-left: 3px solid var(--fla-red);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--fla-red);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+        
+        .assertion-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .assertion-item {
+            background: var(--code-bg);
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border-left: 2px solid var(--fla-red);
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../blog.html" class="back-link">← Voltar ao Blog</a>
+            <h1>📋 Mengão Monitor v3.4: Health Check Templates</h1>
+            <p class="meta">
+                <span class="version-badge">v3.4</span>
+                14 Mar 2026 • 8 min leitura
+            </p>
+        </header>
+
+        <article>
+            <p>Depois de 33 versões construindo o Mengão Monitor, percebi um padrão: toda vez que precisava validar uma API, eu reescrevia a mesma lógica de assertions. Status code, response time, JSON schema... sempre igual.</p>
+
+            <p>O v3.4 resolve isso com <strong>Health Check Templates</strong> — templates pré-definidos que encapsulam a lógica comum de validação de APIs.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">870</div>
+                    <div class="stat-label">Linhas de código</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">52</div>
+                    <div class="stat-label">Test cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Tipos de assertions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Dependências externas</div>
+                </div>
+            </div>
+
+            <h2>O Problema</h2>
+            
+            <p>Antes do v3.4, validar uma API significava:</p>
+            
+            <pre><code># Código repetitivo
+response = requests.get(url)
+assert response.status_code == 200
+assert response.elapsed.total_seconds() < 2.0
+data = response.json()
+assert "status" in data
+assert data["status"] == "ok"
+# ... mais 20 linhas de validação</code></pre>
+
+            <p>Todo endpoint tinha seu próprio código de validação. Sem reutilização, sem padrão, sem histórico.</p>
+
+            <h2>A Solução: Templates</h2>
+
+            <p>Agora, validar uma API REST é uma linha:</p>
+
+            <pre><code>from health_check_templates import RESTTemplate
+
+template = RESTTemplate(
+    name="my-api",
+    url="https://api.example.com/health",
+    expected_status=200,
+    max_response_time=2.0,
+    json_schema={"status": str, "version": str},
+    required_headers=["X-Request-Id"]
+)
+
+result = template.check()
+print(result.passed, result.response_time)</code></pre>
+
+            <h2>8 Tipos de Assertions</h2>
+
+            <div class="assertion-list">
+                <div class="assertion-item"><code>STATUS_CODE</code> - HTTP status</div>
+                <div class="assertion-item"><code>RESPONSE_TIME</code> - Latência</div>
+                <div class="assertion-item"><code>JSON_SCHEMA</code> - Estrutura</div>
+                <div class="assertion-item"><code>JSON_PATH</code> - Valor em path</div>
+                <div class="assertion-item"><code>HEADER</code> - Headers HTTP</div>
+                <div class="assertion-item"><code>BODY_CONTAINS</code> - Texto no body</div>
+                <div class="assertion-item"><code>BODY_REGEX</code> - Regex no body</div>
+                <div class="assertion-item"><code>CUSTOM</code> - Callable</div>
+            </div>
+
+            <p>Cada assertion tem severity level: <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code>. Assertions CRITICAL falham o check inteiro. WARNING só avisa.</p>
+
+            <h2>GraphQL Template</h2>
+
+            <p>GraphQL tem suas particularidades. O template lida com query validation, error detection e data paths:</p>
+
+            <pre><code>from health_check_templates import GraphQLTemplate
+
+template = GraphQLTemplate(
+    name="users-api",
+    url="https://api.example.com/graphql",
+    query="{ users { id name email } }",
+    max_response_time=3.0,
+    expect_no_errors=True,
+    data_paths=[
+        {"path": "users.0.id", "operator": "gt", "value": 0}
+    ]
+)</code></pre>
+
+            <h2>TemplateChecker</h2>
+
+            <p>O <code>TemplateChecker</code> gerencia múltiplos templates com histórico e uptime:</p>
+
+            <pre><code>checker = TemplateChecker()
+checker.register("api1", template1)
+checker.register("api2", template2)
+
+# Executar todos
+results = checker.check_all()
+
+# Histórico
+history = checker.get_history("api1", limit=10)
+
+# Uptime
+uptime = checker.get_uptime("api1")  # 99.95%
+
+# Stats globais
+stats = checker.get_stats()
+# {"total_checks": 142, "passed": 140, "avg_response_time": 0.234}</code></pre>
+
+            <h2>Presets Prontos</h2>
+
+            <p>Templates pré-configurados para stacks comuns:</p>
+
+            <pre><code>from health_check_templates import (
+    create_kubernetes_healthz,
+    create_elasticsearch_health,
+    create_postgres_health
+)
+
+# Kubernetes
+checker.register("k8s", create_kubernetes_healthz(
+    "http://localhost:8080/healthz"
+))
+
+# Elasticsearch
+checker.register("es", create_elasticsearch_health(
+    "http://localhost:9200"
+))</code></pre>
+
+            <div class="highlight">
+                <strong>Zero dependências:</strong> O módulo inteiro usa apenas stdlib. <code>requests</code> é opcional — se não tiver, retorna erro graceful em vez de crash.
+            </div>
+
+            <h2>JSON Schema Validation</h2>
+
+            <p>A validação de JSON schema é built-in, sem precisar de <code>jsonschema</code> lib:</p>
+
+            <pre><code>json_schema = {
+    "status": str,
+    "version": str,
+    "data": {
+        "count": int,
+        "items": [{"id": int, "name": str}]
+    }
+}
+
+template = RESTTemplate(
+    name="api",
+    url="https://api.example.com",
+    json_schema=json_schema
+)</code></pre>
+
+            <p>Valida tipos, chaves obrigatórias, objetos aninhados e arrays.</p>
+
+            <h2>JSON Path Operators</h2>
+
+            <p>Para validação de valores específicos:</p>
+
+            <pre><code>json_paths = [
+    {"path": "data.count", "operator": "gt", "value": 0},
+    {"path": "status", "operator": "eq", "value": "healthy"},
+    {"path": "message", "operator": "contains", "value": "ok"},
+    {"path": "version", "operator": "regex", "value": r"\d+\.\d+"}
+]</code></pre>
+
+            <p>Operadores: <code>eq</code>, <code>ne</code>, <code>gt</code>, <code>lt</code>, <code>gte</code>, <code>lte</code>, <code>contains</code>, <code>regex</code>.</p>
+
+            <h2>Lição: Composição > Configuração</h2>
+
+            <p>O design do v3.4 seguiu o princípio de composição. Em vez de um monólito configurável, temos:</p>
+
+            <ul>
+                <li><strong>Assertion</strong> - Unidade básica de validação</li>
+                <li><strong>BaseTemplate</strong> - Template com lista de assertions</li>
+                <li><strong>RESTTemplate / GraphQLTemplate</strong> - Especializações</li>
+                <li><strong>TemplateChecker</strong> - Gerenciador com histórico</li>
+            </ul>
+
+            <p>Cada camada adiciona funcionalidade sem complicar as anteriores. Assertions podem ser reutilizadas entre templates. Templates podem ser combinados no checker.</p>
+
+            <h2>Próximos Passos</h2>
+
+            <ul>
+                <li><strong>v3.5</strong> - PostgreSQL storage (histórico persistente)</li>
+                <li><strong>v3.6</strong> - Cluster mode (múltiplos workers)</li>
+                <li><strong>v3.7</strong> - Custom exporters (Datadog, New Relic)</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Código:</strong> <a href="https://github.com/Derrota/mengao-monitor" style="color: var(--fla-red);">github.com/Derrota/mengao-monitor</a><br>
+                <strong>Testes:</strong> 52 test cases, todos passando ✅<br>
+                <strong>Commit:</strong> <code>25e7786</code>
+            </div>
+        </article>
+
+        <footer>
+            <p>🔴⚫ Uma vez Flamengo, sempre Flamengo</p>
+            <p>Lek • Mengão Monitor v3.4 • 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
