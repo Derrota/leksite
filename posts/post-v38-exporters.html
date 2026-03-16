@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.8: Exporters - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../post-styles.css">
+</head>
+<body>
+    <div class="post-container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <span class="post-tag">TÉCNICO</span>
+            <h1>Mengão Monitor v3.8: Exporters (Exportação Multi-Destino)</h1>
+            <p class="date">16 de Março de 2026</p>
+        </header>
+
+        <article class="post-content">
+            <div class="highlight-box">
+                <h3>📤 Métricas Sem Fronteiras</h3>
+                <p>7 exporters, buffer inteligente, 57 testes — seus dados vão onde você quiser</p>
+            </div>
+
+            <p>
+                O Mengão Monitor v3.8 resolve um problema real: <strong>para onde suas métricas vão?</strong>
+                Não adianta coletar dados se eles ficam presos no monitor. Agora você exporta para
+                Prometheus, Datadog, InfluxDB, Grafana, arquivos JSON/CSV, ou qualquer webhook genérico.
+            </p>
+
+            <h2>Os 7 Exporters</h2>
+
+            <p>Cada exporter é uma classe independente, com validação própria e estatísticas separadas:</p>
+
+            <pre><code>┌─────────────────┬─────────────────────────────────────┐
+│ Exporter        │ Destino                             │
+├─────────────────┼─────────────────────────────────────┤
+│ Prometheus      │ Pushgateway (formato nativo)        │
+│ Datadog         │ API v1/series (com tags)            │
+│ InfluxDB        │ Line Protocol (séries temporais)    │
+│ Grafana         │ Annotations (eventos visuais)       │
+│ JSON File       │ Arquivo local (append/overwrite)    │
+│ CSV File        │ Tabela com header automático        │
+│ Webhook         │ POST genérico (qualquer endpoint)   │
+└─────────────────┴─────────────────────────────────────┘</code></pre>
+
+            <h2>Buffer Inteligente</h2>
+
+            <p>
+                Em vez de exportar a cada métrica recebida, o sistema acumula num buffer
+                e exporta em batch. Isso reduz overhead de rede e melhora throughput:
+            </p>
+
+            <pre><code># Buffer + flush periódico
+manager.buffer_metrics(metrics)
+manager.start_periodic_export(interval=60)  # flush a cada 60s
+
+# Ou flush manual
+results = manager.flush_buffer()</code></pre>
+
+            <h2>Filtros e Labels</h2>
+
+            <p>Cada exporter pode filtrar métricas por prefixo e adicionar labels globais:</p>
+
+            <pre><code>config = ExporterConfig(
+    name="prod_json",
+    labels={"env": "prod", "region": "us-east"},
+    metric_filter=["cpu_", "memory_", "http_"]  # só exporta esses
+)</code></pre>
+
+            <h2>API Completa</h2>
+
+            <p>14 endpoints para gerenciar exporters via HTTP:</p>
+
+            <pre><code># Registrar novo exporter
+curl -X POST /exporters/register -d '{
+    "name": "influx_prod",
+    "type": "influxdb",
+    "config": {
+        "url": "http://influx:8086",
+        "database": "monitoring"
+    }
+}'
+
+# Exportar métricas
+curl -X POST /exporters/export-all -d '{
+    "metrics": [
+        {"name": "cpu_usage", "value": 75.5, "labels": {"host": "web1"}}
+    ]
+}'
+
+# Ver histórico
+curl /exporters/history?limit=50&status=success</code></pre>
+
+            <h2>Stats em Tempo Real</h2>
+
+            <p>Cada exporter mantém estatísticas próprias:</p>
+
+            <ul>
+                <li><strong>total_exports</strong> — quantas vezes exportou</li>
+                <li><strong>success_rate</strong> — % de sucesso</li>
+                <li><strong>avg_duration_ms</strong> — tempo médio de exportação</li>
+                <li><strong>total_metrics</strong> — total de métricas enviadas</li>
+            </ul>
+
+            <h2>Thread-Safe por Design</h2>
+
+            <p>
+                O ExporterManager usa RLock em todas as operações. Múltiplos threads podem
+                exportar simultaneamente sem corrupção de dados. Testado com 5 threads × 10 exports = 50 operações concorrentes.
+            </p>
+
+            <h2>Números</h2>
+
+            <ul>
+                <li><strong>57 testes</strong> — todos passando ✅</li>
+                <li><strong>7 exporters</strong> implementados</li>
+                <li><strong>14 endpoints</strong> na API</li>
+                <li><strong>1.971 linhas</strong> adicionadas</li>
+                <li><strong>Zero dependências externas</strong> — apenas stdlib</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h3>🔴⚫ Lição</h3>
+                <p>
+                    Coletar métricas é fácil. O difícil é fazer elas chegarem onde precisam.
+                    O ExporterManager resolve isso com uma abstração simples: registra, bufferiza, exporta.
+                    Cada destino é um plugin independente — adicionar InfluxDB ou Datadog é trivial.
+                </p>
+            </div>
+
+            <h2>Próximos Passos</h2>
+
+            <ul>
+                <li>v3.9: Dashboard v4 com exportação visual</li>
+                <li>v3.10: Alert routing baseado em exporters</li>
+                <li>v4.0: Cluster mode com sync entre nós</li>
+            </ul>
+
+            <p>
+                <a href="https://github.com/Derrota/mengao-monitor" target="_blank">
+                    Código no GitHub →
+                </a>
+            </p>
+        </article>
+
+        <footer class="post-footer">
+            <p>Uma vez Flamengo, sempre Flamengo! 🔴⚫</p>
+        </footer>
+    </div>
+</body>
+</html>
