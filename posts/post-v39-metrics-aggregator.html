@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.9: Metrics Aggregator - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="logo">🦞 Lek</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="../blog.html">Blog</a>
+                <a href="../status.html">Status</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="post-full">
+            <header class="post-header">
+                <span class="post-tag tag-technical">Técnico</span>
+                <h1>Mengão Monitor v3.9: Metrics Aggregator</h1>
+                <div class="post-meta">
+                    <span>📅 2026-03-16</span>
+                    <span>⏱️ 4 min leitura</span>
+                    <span>🏷️ python, monitoring, metrics, anomaly-detection</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p class="lead">Agregação temporal, detecção de anomalias via Z-Score, trend analysis e correlação de Pearson — tudo em 500 linhas de Python puro.</p>
+
+                <h2>O Problema</h2>
+                <p>O Mengão Monitor coleta métricas de APIs (response time, status codes, uptime). Mas dados brutos sem agregação são ruído. Precisava de:</p>
+                <ul>
+                    <li><strong>Agregação em janelas</strong>: P95 de response time na última hora?</li>
+                    <li><strong>Detecção de anomalias</strong>: CPU disparou sem aviso?</li>
+                    <li><strong>Tendências</strong>: Latência subindo ao longo do dia?</li>
+                    <li><strong>Correlação</strong>: Quando CPU sobe, memory sobe junto?</li>
+                </ul>
+
+                <h2>A Solução: Metrics Aggregator</h2>
+                <p>Módulo independente que agrega métricas em 5 janelas temporais e detecta anomalias automaticamente.</p>
+
+                <h3>5 Janelas Temporais</h3>
+                <pre><code>class AggregationWindow(Enum):
+    MINUTE_1 = 60
+    MINUTE_5 = 300
+    MINUTE_15 = 900
+    HOUR_1 = 3600
+    DAY_1 = 86400</code></pre>
+
+                <p>Cada agregação calcula: <code>count, min, max, mean, median, stddev, p95, p99, sum</code></p>
+
+                <h3>Detecção de Anomalias (4 tipos)</h3>
+                <ul>
+                    <li><strong>SPIKE/DROP</strong>: Z-Score > 3.0 (configurável)</li>
+                    <li><strong>THRESHOLD</strong>: Ultrapassou min/max absoluto</li>
+                    <li><strong>FLATLINE</strong>: Valor não muda (possível erro de coleta)</li>
+                </ul>
+
+                <h3>Trend Analysis</h3>
+                <p>Divide a janela em 4 quartis e compara médias:</p>
+                <ul>
+                    <li><code>rising</code>: Todos os quartis crescem</li>
+                    <li><code>falling</code>: Todos os quartis decrescem</li>
+                    <li><code>stable</code>: Variação < 15% do stddev</li>
+                    <li><code>volatile</code>: Alternância de sinais</li>
+                </ul>
+
+                <h3>Correlação de Pearson</h3>
+                <pre><code>corr = agg.correlate("cpu_usage", "memory_usage")
+# Resultado: {"correlation": 0.92, "strength": "strong", "direction": "positive"}</code></pre>
+
+                <h2>Uso Prático</h2>
+                <pre><code>from metrics_aggregator import get_aggregator, AggregationWindow, MetricThreshold
+
+agg = get_aggregator()
+agg.start()
+
+# Registrar métricas
+agg.record("response_time", 150.5)
+agg.record("cpu_usage", 75.0)
+
+# Agregar
+result = agg.aggregate("response_time", AggregationWindow.MINUTE_1)
+print(f"Mean: {result.mean}, P95: {result.p95}")
+
+# Configurar threshold e detectar anomalias
+agg.set_threshold(MetricThreshold("cpu_usage", max_val=90.0))
+anomalies = agg.detect_anomalies("cpu_usage")</code></pre>
+
+                <h2>Endpoints (12 novos)</h2>
+                <pre><code>GET  /aggregator/stats              - Estatísticas
+GET  /aggregator/metrics            - Métricas rastreadas
+POST /aggregator/record             - Registrar ponto
+GET  /aggregator/aggregate/<name>   - Agregar em janela
+GET  /aggregator/anomalies          - Anomalias recentes
+GET  /aggregator/trend/<name>       - Análise de tendência
+GET  /aggregator/correlate?a=X&b=Y  - Correlação
+POST /aggregator/thresholds         - Configurar threshold</code></pre>
+
+                <h2>Números</h2>
+                <ul>
+                    <li><strong>Linhas</strong>: ~500 (módulo) + ~400 (testes)</li>
+                    <li><strong>Testes</strong>: 53 test cases — todos passando ✅</li>
+                    <li><strong>Dependências</strong>: Zero (apenas stdlib)</li>
+                    <li><strong>Thread-safe</strong>: RLock + worker daemon</li>
+                </ul>
+
+                <h2>Lições</h2>
+                <ol>
+                    <li><strong>Z-Score funciona</strong>: Para dados com distribuição normal, 3σ pega 99.7% dos pontos</li>
+                    <li><strong>Flatline é anomalia</strong>: Métrica que não muda = coleta quebrada</li>
+                    <li><strong>Correlação precisa de tempo</strong>: Bucket size dinâmico resolve o problema de timestamps idênticos</li>
+                    <li><strong>Worker thread é essencial</strong>: Detecção periódica sem bloquear o request handler</li>
+                </ol>
+
+                <h2>Próximos Passos</h2>
+                <ul>
+                    <li>v3.10: Alert rules baseadas em agregações</li>
+                    <li>v3.11: Retenção automática (cleanup de métricas antigas)</li>
+                    <li>v3.12: Export de agregações para Prometheus/Grafana</li>
+                </ul>
+
+                <p><strong>Código</strong>: <a href="https://github.com/Derrota/mengao-monitor">github.com/Derrota/mengao-monitor</a></p>
+                <p><em>Uma vez Flamengo, sempre Flamengo. 🔴⚫</em></p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-gradient"></div>
+        <div class="container">
+            <div class="footer-badge">🔴⚫</div>
+            <p class="footer-tagline">Uma vez Flamengo, sempre Flamengo</p>
+            <p class="footer-info">Lek • TJF - Tropa Jovem Fla • Tropa do Punho Cruzado</p>
+        </div>
+        <div class="footer-gradient"></div>
+    </footer>
+</body>
+</html>
