@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.10: Distributed Tracing - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../post-styles.css">
+    <style>
+        .code-block {
+            background: #1a1a2e;
+            border: 1px solid #dc143c;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .code-block code {
+            color: #e0e0e0;
+        }
+        .trace-example {
+            background: #0d1117;
+            border-left: 3px solid #dc143c;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .trace-span {
+            margin-left: 1rem;
+            border-left: 2px solid #dc143c;
+            padding-left: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .trace-child {
+            margin-left: 2rem;
+            border-left: 2px solid #8b0000;
+            padding-left: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        .highlight-box {
+            background: rgba(220, 20, 60, 0.1);
+            border: 1px solid #dc143c;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-card {
+            background: rgba(220, 20, 60, 0.05);
+            border: 1px solid #dc143c;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc143c;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+        .endpoint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .endpoint-table th, .endpoint-table td {
+            border: 1px solid #333;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .endpoint-table th {
+            background: rgba(220, 20, 60, 0.1);
+        }
+        .method-get {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .method-post {
+            color: #FF9800;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../index.html">← Voltar</a>
+            <a href="../blog.html">Blog</a>
+        </nav>
+    </header>
+
+    <main class="post-content">
+        <article>
+            <div class="post-meta">
+                <span class="post-date">16 Mar 2026</span>
+                <span class="post-version">v3.10</span>
+                <span class="post-type">Técnico</span>
+            </div>
+
+            <h1>Mengão Monitor v3.10: Distributed Tracing</h1>
+            <h2>Spans, Correlation IDs e Export Jaeger</h2>
+
+            <div class="highlight-box">
+                <strong>Resumo:</strong> Sistema de tracing distribuído para rastrear requests através de múltiplos serviços. Spans aninhados, correlation IDs async-safe, export Jaeger/Zipkin. 35 testes, zero dependências externas.
+            </div>
+
+            <h3>🎯 O Problema</h3>
+            <p>Quando um request passa por múltiplos serviços (frontend → API → database → cache), como você sabe onde gastou tempo? Logs ajudam, mas são fragmentados. Métricas mostram agregados, mas não o contexto individual.</p>
+            <p>Tracing distribuído conecta tudo: cada operação vira um <strong>span</strong>, todos compartilham um <strong>trace_id</strong>, e você vê exatamente onde o tempo foi gasto.</p>
+
+            <h3>🏗️ Arquitetura</h3>
+            <div class="trace-example">
+                <div><strong>Trace: req-123 (145ms total)</strong></div>
+                <div class="trace-span">
+                    <div>http_request (145ms) ✅</div>
+                    <div class="trace-child">
+                        <div>auth_check (12ms) ✅</div>
+                    </div>
+                    <div class="trace-child">
+                        <div>db_query (89ms) ✅</div>
+                    </div>
+                    <div class="trace-child">
+                        <div>cache_lookup (3ms) ✅</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📊 Stats do Projeto</h3>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value">35</div>
+                    <div class="stat-label">Test Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Dependências</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Endpoints</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Export Formats</div>
+                </div>
+            </div>
+
+            <h3>💻 Uso Básico</h3>
+            <div class="code-block">
+                <code>
+# Context manager (recomendado)
+with tracer.span("api_call", {"endpoint": "/users"}) as span:
+    result = api_call()
+    span.set_attribute("status_code", 200)
+    span.add_event("cache_miss")
+
+# Correlation ID
+with tracer.correlation_id("req-123"):
+    # Todos spans criados aqui terão correlation_id
+    with tracer.span("db_query") as span:
+        db.query()
+
+# Decorator
+@tracer.trace("process_request")
+def handle_request(req):
+    ...
+                </code>
+            </div>
+
+            <h3>🔗 Correlation IDs</h3>
+            <p>Correlation IDs conectam traces com logs e métricas. Use <code>ContextVar</code> para async/concurrent safety:</p>
+            <div class="code-block">
+                <code>
+from tracing import tracer, get_correlation_id
+import logging
+
+logger = logging.getLogger(__name__)
+
+with tracer.correlation_id("req-456"):
+    cid = get_correlation_id()
+    logger.info("Processing", extra={"correlation_id": cid})
+    
+    with tracer.span("operation") as span:
+        span.set_attribute("user_id", 42)
+        # ... work ...
+                </code>
+            </div>
+
+            <h3>📤 Export Formats</h3>
+            <p>Traces podem ser exportados em formato JSON ou Jaeger (compatível com Zipkin):</p>
+            <div class="code-block">
+                <code>
+# Export JSON
+json_str = tracer.export_json(trace_id)
+
+# Export Jaeger
+jaeger_spans = tracer.export_jaeger(trace_id)
+                </code>
+            </div>
+
+            <h3>🔌 Endpoints</h3>
+            <table class="endpoint-table">
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Método</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/tracing/stats</code></td>
+                        <td class="method-get">GET</td>
+                        <td>Estatísticas do tracer</td>
+                    </tr>
+                    <tr>
+                        <td><code>/tracing/spans</code></td>
+                        <td class="method-get">GET</td>
+                        <td>Lista spans com filtros</td>
+                    </tr>
+                    <tr>
+                        <td><code>/tracing/trace/<id></code></td>
+                        <td class="method-get">GET</td>
+                        <td>Trace completo</td>
+                    </tr>
+                    <tr>
+                        <td><code>/tracing/trace/<id>/jaeger</code></td>
+                        <td class="method-get">GET</td>
+                        <td>Export formato Jaeger</td>
+                    </tr>
+                    <tr>
+                        <td><code>/tracing/clear</code></td>
+                        <td class="method-post">POST</td>
+                        <td>Limpa dados (admin)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>🧪 Testes</h3>
+            <p>35 test cases cobrindo:</p>
+            <ul>
+                <li>Span creation, duration, attributes, events</li>
+                <li>Tracer: start, nested, context manager, decorator</li>
+                <li>Correlation ID context</li>
+                <li>Export formats (Jaeger, JSON)</li>
+                <li>Integration: full request trace, error propagation</li>
+                <li>Thread safety: concurrent traces</li>
+            </ul>
+
+            <div class="highlight-box">
+                <strong>Lição:</strong> Tracing não é sobre coletar dados — é sobre contar histórias. Um trace conta a história completa de um request, do início ao fim.
+            </div>
+
+            <h3>🗺️ Próximos Passos</h3>
+            <ul>
+                <li>v3.11: Auto-instrumentation para requests/Flask</li>
+                <li>v3.12: Sampling configurável (head/tail)</li>
+                <li>v3.13: Export para OpenTelemetry Collector</li>
+            </ul>
+
+            <p style="text-align: center; margin-top: 2rem;">
+                <a href="https://github.com/Derrota/mengao-monitor" class="cta-button">Ver no GitHub</a>
+            </p>
+        </article>
+    </main>
+
+    <footer>
+        <p>🔴⚫ Uma vez Flamengo, sempre Flamengo</p>
+    </footer>
+</body>
+</html>
