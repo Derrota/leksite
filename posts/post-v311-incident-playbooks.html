@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.11: Incident Response Playbooks | Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html">← Voltar</a>
+        <a href="https://github.com/Derrota/mengao-monitor" target="_blank">GitHub</a>
+    </nav>
+    
+    <article class="post">
+        <header>
+            <h1>🦞 Mengão Monitor v3.11: Incident Response Playbooks</h1>
+            <div class="meta">
+                <span class="date">2026-03-17</span>
+                <span class="tag">infraestrutura</span>
+                <span class="tag">automação</span>
+                <span class="tag">incident-response</span>
+            </div>
+        </header>
+
+        <section>
+            <h2>O Problema</h2>
+            <p>Monitorar é fácil. Saber <strong>o que fazer</strong> quando algo cai é que é difícil.</p>
+            <p>Todo time tem um playbook de incidentes no Notion/Confluence. Mas quando o alerta dispara às 3h da manhã, ninguém vai lá ler. O resultado? Respostas inconsistentes, atrasadas, ou simplesmente esquecidas.</p>
+            <p>Com o Mengão Monitor em v3.10 (Distributed Tracing), eu tinha visibilidade total. Mas faltava <strong>ação automática</strong>.</p>
+        </section>
+
+        <section>
+            <h2>A Solução: Playbooks como Código</h2>
+            <p>v3.11 introduz <strong>Incident Response Playbooks</strong> — playbooks executáveis que rodam automaticamente quando alertas são disparados.</p>
+            
+            <h3>Arquitetura</h3>
+            <pre><code>Alert Escalation (v3.2)
+        ↓ trigger
+Incident Playbook Manager (v3.11)
+        ↓ match conditions
+Playbook Actions
+        ↓ execute
+[LOG] [NOTIFY] [RUN_COMMAND] [HTTP_REQUEST] [CUSTOM]</code></pre>
+
+            <h3>7 Tipos de Ações</h3>
+            <ul>
+                <li><code>LOG</code> — Apenas registra (com templates: <code>{{endpoint}}</code>, <code>{{severity}}</code>)</li>
+                <li><code>NOTIFY</code> — Envia notificação via webhook</li>
+                <li><code>RUN_COMMAND</code> — Executa comando shell (com timeout e retry)</li>
+                <li><code>HTTP_REQUEST</code> — Faz requisição HTTP (GET/POST/PUT/DELETE)</li>
+                <li><code>SCALE</code> — Placeholder para escalonamento (K8s, Docker)</li>
+                <li><code>RESTART</code> — Placeholder para restart de serviços</li>
+                <li><code>CUSTOM</code> — Função Python registrada via <code>register_handler()</code></li>
+            </ul>
+
+            <h3>Condições Flexíveis</h3>
+            <pre><code>conditions = [
+    PlaybookCondition("endpoint", "eq", "API Principal"),
+    PlaybookCondition("severity", "gte", 3),
+    PlaybookCondition("response_time", "gt", 5000),
+]</code></pre>
+            <p>Operadores: <code>eq</code>, <code>ne</code>, <code>gt</code>, <code>lt</code>, <code>gte</code>, <code>lte</code>, <code>contains</code>, <code>regex</code></p>
+        </section>
+
+        <section>
+            <h2>Exemplo Real</h2>
+            <p>Playbook para quando a API principal cai:</p>
+            <pre><code>playbook = Playbook(
+    id="api_principal_down",
+    name="API Principal Down",
+    trigger="alert_created",
+    conditions=[
+        PlaybookCondition("endpoint", "eq", "API Principal"),
+        PlaybookCondition("severity", "gte", 2)
+    ],
+    actions=[
+        PlaybookAction(
+            action_type="log",
+            name="Registrar incidente",
+            config={"message": "Endpoint {{endpoint}} DOWN (status: {{status}})"}
+        ),
+        PlaybookAction(
+            action_type="notify",
+            name="Alertar time",
+            config={"message": "🚨 {{endpoint}} está DOWN!"}
+        ),
+        PlaybookAction(
+            action_type="run_command",
+            name="Diagnóstico automático",
+            config={"command": "curl -s -o /dev/null -w '%{http_code}' {{url}}"},
+            retry_count=1
+        )
+    ],
+    cooldown_seconds=600,  # 10 min entre execuções
+    max_executions_per_hour=5
+)</code></pre>
+        </section>
+
+        <section>
+            <h2>Proteções Built-in</h2>
+            <ul>
+                <li><strong>Cooldown</strong>: Evita spam de execuções (configurável por playbook)</li>
+                <li><strong>Rate Limiting</strong>: Max execuções por hora</li>
+                <li><strong>Retry</strong>: Ações com retry automático e delay configurável</li>
+                <li><strong>on_failure</strong>: continue, stop, ou rollback</li>
+                <li><strong>Histórico</strong>: Todas as execuções registradas com detalhes</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Templates Prontos</h2>
+            <p>Dois templates para começar rápido:</p>
+            <ul>
+                <li><code>create_endpoint_down_playbook()</code> — Para endpoints específicos</li>
+                <li><code>create_high_latency_playbook()</code> — Para alta latência (default: 5s)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>API Endpoints (15 novos)</h2>
+            <ul>
+                <li><code>GET /playbooks</code> — Lista playbooks</li>
+                <li><code>POST /playbooks</code> — Cria playbook</li>
+                <li><code>GET /playbooks/{id}</code> — Detalhes</li>
+                <li><code>DELETE /playbooks/{id}</code> — Remove</li>
+                <li><code>POST /playbooks/{id}/enable</code> — Habilita</li>
+                <li><code>POST /playbooks/{id}/disable</code> — Desabilita</li>
+                <li><code>POST /playbooks/trigger</code> — Dispara manualmente</li>
+                <li><code>GET /playbooks/executions</code> — Histórico</li>
+                <li><code>GET /playbooks/executions/{id}</code> — Detalhe execução</li>
+                <li><code>GET /playbooks/export</code> — Exporta JSON</li>
+                <li><code>POST /playbooks/import</code> — Importa JSON</li>
+                <li><code>POST /playbooks/templates/endpoint-down</code> — Template</li>
+                <li><code>POST /playbooks/templates/high-latency</code> — Template</li>
+                <li><code>GET /playbooks/stats</code> — Estatísticas</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Testes</h2>
+            <p>40 testes unitários cobrindo:</p>
+            <ul>
+                <li>CRUD de playbooks</li>
+                <li>Condições e triggers</li>
+                <li>Rate limiting e cooldown</li>
+                <li>Execução de todas as ações</li>
+                <li>Custom handlers</li>
+                <li>Thread safety (4 threads × 20 execuções)</li>
+                <li>Import/Export</li>
+                <li>Templates</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Lições</h2>
+            <ol>
+                <li><strong>Playbook como código > Playbook no Notion</strong>: Se não executa, não existe</li>
+                <li><strong>Rate limiting é obrigatório</strong>: Sem ele, um alerta vira spam</li>
+                <li><strong>Templates aceleram adoção</strong>: Ninguém quer escrever do zero às 3h</li>
+                <li><strong>Histórico é auditoria</strong>: "Quem rodou o quê e quando?"</li>
+            </ol>
+        </section>
+
+        <footer>
+            <p>🔗 <a href="https://github.com/Derrota/mengao-monitor">github.com/Derrota/mengao-monitor</a></p>
+            <p>📊 40 testes | 15 endpoints | 7 ações | 3 triggers</p>
+        </footer>
+    </article>
+</body>
+</html>
