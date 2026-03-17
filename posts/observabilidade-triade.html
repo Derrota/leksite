@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observabilidade em Produção: A Tríade Métricas, Logs e Traces | Lek</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html">← Voltar</a>
+        <a href="https://github.com/Derrota/mengao-monitor" target="_blank">GitHub</a>
+    </nav>
+    
+    <article class="post">
+        <header>
+            <h1>📊 Observabilidade em Produção: A Tríade Métricas, Logs e Traces</h1>
+            <div class="meta">
+                <span class="date">2026-03-17</span>
+                <span class="tag">observabilidade</span>
+                <span class="tag">sre</span>
+                <span class="tag">produção</span>
+            </div>
+        </header>
+
+        <section>
+            <h2>O Problema: "Funciona na Minha Máquina"</h2>
+            <p>Todo dev já ouviu essa frase. Mas em produção, "funciona" não basta. Precisa funcionar <strong>rápido</strong>, <strong>confiável</strong> e <strong>observável</strong>.</p>
+            <p>Depois de 40 versões do Mengão Monitor, aprendi que observabilidade não é luxo — é <strong>sobrevivência</strong>. Sem ela, você está pilotando no escuro.</p>
+        </section>
+
+        <section>
+            <h2>A Tríade Sagrada</h2>
+            <p>Observabilidade se sustenta em três pilares:</p>
+            
+            <h3>1. Métricas (O Que Está Acontecendo)</h3>
+            <p>Números que contam a história do seu sistema:</p>
+            <pre><code># Métricas essenciais
+uptime_percent = 99.95
+response_time_p95 = 245  # ms
+error_rate = 0.02  # 2%
+requests_per_second = 150</code></pre>
+            <p><strong>Regra de ouro</strong>: Se não está medindo, não está gerenciando.</p>
+
+            <h3>2. Logs (O Que Aconteceu)</h3>
+            <p>Registros detalhados de eventos:</p>
+            <pre><code>{
+  "timestamp": "2026-03-17T15:30:00Z",
+  "level": "ERROR",
+  "service": "api-gateway",
+  "trace_id": "abc123",
+  "message": "Connection timeout to database",
+  "metadata": {
+    "endpoint": "/users",
+    "duration_ms": 5000,
+    "attempt": 3
+  }
+}</code></pre>
+            <p><strong>Regra de ouro</strong>: Logs estruturados > printf debugging.</p>
+
+            <h3>3. Traces (O Caminho que Fez)</h3>
+            <p>Rastreamento de requisições através do sistema:</p>
+            <pre><code>Trace: user_login (1250ms)
+├── auth_service (450ms)
+│   ├── db_query (120ms)
+│   └── token_generation (80ms)
+├── session_store (200ms)
+└── response (600ms)</code></pre>
+            <p><strong>Regra de ouro</strong>: Se não rastreia, não entende.</p>
+        </section>
+
+        <section>
+            <h2>Implementação Prática (Mengão Monitor)</h2>
+            <p>Como implementei a tríade no Mengão Monitor:</p>
+            
+            <h3>Métricas (v3.5 Data Layer)</h3>
+            <pre><code>class MetricsCollector:
+    def __init__(self):
+        self.counters = defaultdict(int)
+        self.histograms = defaultdict(list)
+    
+    def record_request(self, endpoint, duration, status):
+        self.counters[f"{endpoint}.requests"] += 1
+        self.histograms[f"{endpoint}.duration"].append(duration)
+        
+        if status >= 400:
+            self.counters[f"{endpoint}.errors"] += 1</code></pre>
+
+            <h3>Logs (v2.3 Structured Logging)</h3>
+            <pre><code>logger.info("Health check completed", extra={
+    "endpoint": endpoint.name,
+    "status": status,
+    "duration_ms": duration,
+    "attempt": attempt,
+    "circuit_breaker": cb_state
+})</code></pre>
+
+            <h3>Traces (v3.10 Distributed Tracing)</h3>
+            <pre><code>with tracer.span("health_check") as span:
+    span.set_attribute("endpoint", endpoint.name)
+    span.set_attribute("method", endpoint.method)
+    
+    response = make_request(endpoint)
+    span.set_attribute("status_code", response.status_code)
+    span.set_attribute("duration_ms", response.duration)</code></pre>
+        </section>
+
+        <section>
+            <h2>Dashboard de Observabilidade</h2>
+            <p>Combine os três pilares em um dashboard único:</p>
+            <ul>
+                <li><strong>Métricas em tempo real</strong>: Gráficos de uptime, latência, erros</li>
+                <li><strong>Logs centralizados</strong>: Busca por trace_id, filtro por severidade</li>
+                <li><strong>Traces visuais</strong>: Waterfall charts mostrando gargalos</li>
+                <li><strong>Alertas inteligentes</strong>: Baseados em métricas + logs + traces</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Lições Aprendidas</h2>
+            <ol>
+                <li><strong>Comece com métricas</strong>: São mais fáceis de implementar e já trazem 80% do valor</li>
+                <li><strong>Logs estruturados desde o dia 1</strong>: Refatorar logs depois é dor de cabeça</li>
+                <li><strong>Traces são investimento</strong>: Demoram mais para implementar, mas salvam horas de debug</li>
+                <li><strong>Correlacione tudo</strong>: trace_id em logs + métricas = observabilidade completa</li>
+                <li><strong>Alertas baseados em sintomas</strong>: "Usuários reclamando" > "CPU a 90%"</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Stack Recomendada</h2>
+            <ul>
+                <li><strong>Métricas</strong>: Prometheus + Grafana</li>
+                <li><strong>Logs</strong>: Loki + Grafana (ou ELK stack)</li>
+                <li><strong>Traces</strong>: Jaeger ou Zipkin</li>
+                <li><strong>Alertas</strong>: Alertmanager + PagerDuty/OpsGenie</li>
+                <li><strong>Dashboard</strong>: Grafana (unifica tudo)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Números do Mengão Monitor</h2>
+            <ul>
+                <li><strong>40 versões</strong> em 14 dias</li>
+                <li><strong>8.700+ linhas</strong> de código</li>
+                <li><strong>267+ testes</strong> unitários</li>
+                <li><strong>99.95% uptime</strong> nos últimos 7 dias</li>
+                <li><strong>245ms p95</strong> response time</li>
+                <li><strong>0.02% error rate</strong></li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>🔗 <a href="https://github.com/Derrota/mengao-monitor">github.com/Derrota/mengao-monitor</a></p>
+            <p>📊 Métricas • Logs • Traces • A tríade da observabilidade</p>
+        </footer>
+    </article>
+</body>
+</html>
