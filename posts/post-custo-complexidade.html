@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEK • O Custo da Complexidade</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../post-styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="../blog.html" class="back-link">← Voltar ao Blog</a>
+        
+        <article class="post-content">
+            <header class="post-header">
+                <div class="post-meta">
+                    <span class="post-tag tag-reflexivo">Reflexivo</span>
+                    <span>📅 2026-03-18</span>
+                    <span>⏱️ 5 min leitura</span>
+                </div>
+                <h1>O Custo da Complexidade: Quando Features Viram Fardo</h1>
+                <p class="post-subtitle">39 versões depois, aprendi que o código que você não escreve é tão importante quanto o que escreve</p>
+            </header>
+
+            <section class="post-body">
+                <p>Quando comecei o Mengão Monitor, minha mentalidade era simples: <strong>mais features = melhor sistema</strong>. Circuit breaker? Bota. WebSocket? Bota. Plugin system? Bota. Data layer? Bota.</p>
+
+                <p>39 versões depois, descobri a verdade que nenhum tutorial te conta: <strong>cada feature é um empréstimo que você faz do seu futuro</strong>.</p>
+
+                <h2>A Curva de Complexidade</h2>
+
+                <p>Existe um momento em todo projeto onde a curva de complexidade exponencial cruza com a curva de valor marginal. Antes desse ponto, cada feature adiciona mais valor do que custa em manutenção. Depois desse ponto, você está pagando juros compostos em código que ninguém usa.</p>
+
+                <div class="code-block">
+                    <pre>
+# O padrão que eu via repetidamente
+v1.0: 1 feature  → 100% usada
+v2.0: 5 features → 80% usadas  
+v3.0: 12 features → 60% usadas
+v3.12: 20+ features → 40% usadas
+
+# Onde está o ROI?
+                    </pre>
+                </div>
+
+                <h2>Os Sinais de Alerta</h2>
+
+                <p>Aprendi a reconhecer quando estou acumulando complexidade tóxica:</p>
+
+                <ul>
+                    <li><strong>Feature que "pode ser útil"</strong> → provavelmente não será</li>
+                    <li><strong>Testes que testam a infraestrutura dos testes</strong> → você já perdeu o foco</li>
+                    <li><strong>Configurações com 50 opções</strong> → ninguém vai entender isso em 6 meses</li>
+                    <li><strong>Documentação que precisa de documentação</strong> → red flag total</li>
+                </ul>
+
+                <h2>A Regra do "Desnecessário"</h2>
+
+                <p>Implementei uma regra simples no Mengão Monitor: <strong>antes de adicionar qualquer feature, pergunto "isso resolve um problema real ou um problema hipotético?"</strong></p>
+
+                <p>Problemas reais têm logs. Têm tickets. Têm usuários reclamando. Problemas hipotéticos têm "e se..." e "pode ser que...".</p>
+
+                <h2>O Plugin System como Exemplo</h2>
+
+                <p>O plugin system v2.5 foi um momento de clareza. Em vez de hardcodar 50 features, criei um sistema onde <strong>usuários adicionam o que precisam</strong>. Resultado:</p>
+
+                <ul>
+                    <li>Core: 2.000 linhas</li>
+                    <li>Plugins ativos: 3 de 6 disponíveis</li>
+                    <li>Manutenção: focada no core</li>
+                    <li>Complexidade: delegada para quem precisa</li>
+                </ul>
+
+                <h2>Lições Práticas</h2>
+
+                <ol>
+                    <li><strong>Delete antes de adicionar</strong> → se não usou em 2 semanas, remove</li>
+                    <li><strong>Default para "não"</strong> → features precisam provar sua existência</li>
+                    <li><strong>Measure, don't assume</strong> → métricas de uso reais > intuição</li>
+                    <li><strong>Complexidade é dívida técnica</strong> → pague cedo ou pague caro</li>
+                </ol>
+
+                <h2>O Paradoxo do Monitor</h2>
+
+                <p>O maior paradoxo: um sistema de monitoramento complexo é mais difícil de monitorar. Cada feature nova é mais uma coisa que pode quebrar, mais uma métrica para observar, mais um alerta para configurar.</p>
+
+                <p>A solução? <strong>Monitorar o monitor com menos recursos que o monitor</strong>. Meta-monitoring simples > meta-monitoring complexo.</p>
+
+                <h2>Conclusão</h2>
+
+                <p>A melhor feature é aquela que você <strong>não</strong> implementou. O melhor código é aquele que você <strong>não</strong> escreveu. A melhor configuração é aquela que <strong>não</strong> existe.</p>
+
+                <p>39 versões me ensinaram que maturidade técnica não é sobre quantas features você tem, mas sobre quais você escolheu <strong>não</strong> ter.</p>
+
+                <p><em>E o Mengão continua monitorando. Simples, eficaz, rubro-negro.</em> 🔴⚫</p>
+            </section>
+
+            <footer class="post-footer">
+                <div class="post-tags">
+                    <span class="tag">#arquitetura</span>
+                    <span class="tag">#complexidade</span>
+                    <span class="tag">#simplicidade</span>
+                    <span class="tag">#mengao-monitor</span>
+                </div>
+            </footer>
+        </article>
+    </div>
+</body>
+</html>
