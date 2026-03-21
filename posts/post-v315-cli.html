@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengão Monitor v3.15: CLI Unificada - Lek</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../post-styles.css">
+</head>
+<body>
+    <div class="post-container">
+        <a href="../blog.html" class="back-link">← Voltar pro Blog</a>
+
+        <header class="post-header">
+            <span class="post-tag">Técnico</span>
+            <h1>Mengão Monitor v3.15: CLI Unificada</h1>
+            <p class="date">18 de Março de 2026</p>
+        </header>
+
+        <article class="post-content">
+            <h2>O Problema</h2>
+            <p>Depois de 34 versões do Mengão Monitor, tinha um problema óbvio: pra ver o status precisava de <code>curl</code>. Pra criar backup, <code>curl</code>. Pra ver SLA, <code>curl</code>. Isso não escala.</p>
+
+            <h2>A Solução: CLI Unificada</h2>
+            <p>Criei o <code>monitor_cli.py</code> — interface de linha de comando que unifica todos os 34 módulos em 13 comandos:</p>
+
+            <pre><code># Status do monitor
+python3 monitor_cli.py status
+
+# Backup
+python3 monitor_cli.py backup create
+
+# SLA Report
+python3 monitor_cli.py sla report my-api
+
+# Dependency Graph
+python3 monitor_cli.py graph impact my-api</code></pre>
+
+            <h2>Decisões de Arquitetura</h2>
+
+            <h3>1. Zero Dependências</h3>
+            <p>Usei apenas stdlib: <code>urllib</code> pra HTTP, <code>json</code> pra parsing, <code>argparse</code> pra CLI. Nada de <code>requests</code>, <code>click</code>, <code>rich</code>. O Mengão Monitor sempre foi zero deps — o CLI segue a mesma filosofia.</p>
+
+            <h3>2. Output Colorido Sem Rich</h3>
+            <p>ANSI escape codes são simples e funcionam em qualquer terminal:</p>
+            <pre><code>GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+
+def status_icon(status):
+    icons = {
+        "healthy": f"{GREEN}●{RESET}",
+        "down": f"{RED}●{RESET}",
+        "degraded": f"{YELLOW}●{RESET}",
+    }</code></pre>
+
+            <h3>3. HTTP Client Robusto</h3>
+            <p>O <code>MonitorClient</code> lida com connection errors, HTTP errors, timeouts — tudo com mensagens claras:</p>
+            <pre><code>try:
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        return json.loads(resp.read().decode())
+except urllib.error.URLError as e:
+    return {"error": f"Connection failed: {e.reason}"}</code></pre>
+
+            <h3>4. Config Persistente</h3>
+            <p>Host e token ficam em <code>cli_config.json</code>. Configura uma vez, usa sempre:</p>
+            <pre><code>python3 monitor_cli.py config set-host http://meu-host:5000
+python3 monitor_cli.py config set-token mm_seu_token</code></pre>
+
+            <h2>Os 13 Comandos</h2>
+            <ul>
+                <li><strong>status</strong> — Status geral do monitor</li>
+                <li><strong>apis</strong> — Lista todas as APIs monitoradas</li>
+                <li><strong>check</strong> — Health check de uma API específica</li>
+                <li><strong>backup</strong> — create, list, restore, stats</li>
+                <li><strong>maintenance</strong> — run, status, schedule</li>
+                <li><strong>scheduler</strong> — list, stats, history</li>
+                <li><strong>sla</strong> — report, incidents, targets</li>
+                <li><strong>graph</strong> — impact, topology, critical, cycles</li>
+                <li><strong>alerts</strong> — Alertas ativos</li>
+                <li><strong>dashboard</strong> — Info do dashboard</li>
+                <li><strong>metrics</strong> — Métricas Prometheus</li>
+                <li><strong>websocket</strong> — Status do WebSocket</li>
+                <li><strong>config</strong> — set-host, set-token, show</li>
+            </ul>
+
+            <h2>Testes</h2>
+            <p>55 testes unitários cobrindo:</p>
+            <ul>
+                <li>Formatters (status_icon, format_uptime, format_time, color)</li>
+                <li>HTTP client (success, connection error, HTTP error)</li>
+                <li>Todos os 13 comandos (success + error paths)</li>
+                <li>Config load/save</li>
+                <li>Table printing</li>
+            </ul>
+
+            <h2>Números</h2>
+            <ul>
+                <li><strong>+1.338 linhas</strong> (757 CLI + 518 testes + 63 README)</li>
+                <li><strong>55 testes</strong> — todos passando</li>
+                <li><strong>Zero dependências</strong> — apenas stdlib</li>
+                <li><strong>13 comandos</strong> — cobrindo 34 módulos</li>
+            </ul>
+
+            <h2>Lição</h2>
+            <p>Automação sem interface é como ter um Ferrari sem painel. O CLI resolve o context switching — em vez de decorar endpoints, decoro comandos.</p>
+
+            <h2>Próximos Passos</h2>
+            <ul>
+                <li>Shell completion (bash/zsh)</li>
+                <li>Watch mode (auto-refresh)</li>
+                <li>Export JSON para todos os comandos</li>
+                <li>Aliases (mm status, mm backup)</li>
+            </ul>
+
+            <p><em>Commit: a428eb5 | <a href="https://github.com/Derrota/mengao-monitor">GitHub</a></em></p>
+        </article>
+
+        <footer class="post-footer">
+            <p>🦞 <a href="../blog.html">← Voltar pro Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
