@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Hunter com Mentalidade de Agente</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body class="post-body">
+    <article class="post-content">
+        <header class="post-header">
+            <div class="post-meta">
+                <span class="post-tag">Hobby</span>
+                <span>📅 2026-03-21</span>
+                <span>🕐 5 min leitura</span>
+            </div>
+            <h1>Monster Hunter com Mentalidade de Agente</h1>
+            <p class="post-subtitle">Como um jogo de caçar monstros me ensinou mais sobre arquitetura de sistemas do que muitos cursos</p>
+        </header>
+
+        <section class="post-section">
+            <p>Jogo Monster Hunter desde 2018. Mais de 1.000 horas. Já matei monstros que nem sabia que existiam. E no meio dessa jornada, descobri que o jogo é um dos melhores treinamentos de engenharia de software que existe — sem precisar escrever uma linha de código.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>1. Preparação é Tudo (Infraestrutura)</h2>
+            <p>No Monster Hunter, você não entra numa arena com um monstro furioso de cara. Você prepara:</p>
+            <ul>
+                <li><strong>Equipamento adequado</strong> → Escolher a armadura certa (resistência a fogo, gelo, etc.)</li>
+                <li><strong>Itens de suporte</strong> → Poções, armadilhas, munição especial</li>
+                <li><strong>Conhecimento do monstro</strong> → Padrões de ataque, pontos fracos, comportamento</li>
+            </ul>
+            <p>Em sistemas, é a mesma coisa. Você não coloca um serviço em produção sem:</p>
+            <ul>
+                <li><strong>Monitoramento</strong> → Saber o que está acontecendo</li>
+                <li><strong>Alertas</strong> → Ser notificado quando algo dá errado</li>
+                <li><strong>Runbooks</strong> → Ter um plano para cada falha conhecida</li>
+            </ul>
+            <p>Caçar Rathalos sem saber que ele tem um ataque de fogo que te derrete é como deployar sem logs — você não sabe por que morreu, só sabe que morreu.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>2. Pattern Recognition (Observabilidade)</h2>
+            <p>Cada monstro tem um padrão. O Tigrex tem 3 fases: carga rápida, pulo, fúria. O Valstrax tem dive bomb, fireball, laser. Depois de 20 caçadas, você reconhece os sinais antes do ataque.</p>
+            <p>Em produção, padrões são tudo:</p>
+            <ul>
+                <li>CPU sobe 30% toda terça às 3h? → Backup noturno</li>
+                <li>Erro 500 só em requisições POST? → Validação de payload</li>
+                <li>Latência pica a cada 100 requests? → Memory leak no loop</li>
+            </ul>
+            <p>O <strong>Mengão Monitor</strong> que eu construí é basicamente um caçador de padrões. Ele observa, aprende, alerta. Só não avisa quando o monstro é amigável (tipo o Paolumu que só dorme).</p>
+        </section>
+
+        <section class="post-section">
+            <h2>3. Fail Fast, Recover Faster (Circuit Breakers)</h2>
+            <p>Tentar esquivar de todos os ataques é impossível. O segredo é:</p>
+            <ol>
+                <li><strong>Identificar quando tá difícil</strong> → O monstro tá em modo fúria, seus recursos tão acabando</li>
+                <li><strong>Recuar estrategicamente</strong> → Tomar uma poção e esperar a janela</li>
+                <li><strong>Retomar no timing certo</strong> → Ataque quando ele cansar</li>
+            </ol>
+            <p>Circuit breakers em sistemas são exatamente isso. Quando um endpoint tá caindo muito, você para de chamar (OPEN state), espera um pouco (HALF_OPEN), e testa devagar (CLOSED se voltar).</p>
+            <p>O Mengão Monitor v2.4 implementa isso em 40 linhas. E salva sistemas de flood de requests.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>4. Loadouts como Templates (Reusabilidade)</h2>
+            <p>Eu tenho 3 loadouts principais:</p>
+            <ul>
+                <li><strong>DPS rápido</strong> → Dual Blades, adrenalina+2, crítico elementar</li>
+                <li><strong>Tank suporte</strong> → Lanceiro, guarda, amplificador de buffs</li>
+                <li><strong>Status effect</strong> → Adormecer, paralisar, explosões</li>
+            </ul>
+            <p>Cada loadout é um template. Eu copio, ajusto 2-3 skills, e tô pronto pra caçar outro monstro.</p>
+            <p>Em código, templates são o que o Mengão Monitor v3.4 faz com Health Checks. Você define um template "REST API" e usa em 10 endpoints diferentes. Não precisa reescrever a lógica.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>5. The Grind é Real (Iteração Contínua)</h2>
+            <p>Pra conseguir um set de armadura endgame, você mata o mesmo monstro 50 vezes. Drop rate de 5%. Você falha 47 vezes. Nas 3 últimas, você consegue.</p>
+            <p>Build de software é a mesma coisa:</p>
+            <ul>
+                <li>Primeira versão: funciona, mas é feia</li>
+                <li>Versão 5: adiciona caching</li>
+                <li>Versão 10: refatora, separa camadas</li>
+                <li>Versão 15: adiciona observabilidade</li>
+            </ul>
+            <p>O Mengão Monitor tá na versão 3.13 e ainda longe do "endgame". Mas a cada versão, um drop. A cada commit, um material raro.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>6. Teamwork (Sistemas Distribuídos)</h2>
+            <p>Caçar em grupo de 4 é lindo. Cada um tem um papel:</p>
+            <ul>
+                <li><strong>Tank</strong> → Segura aggro, protege os outros</li>
+                <li><strong>DPS</strong> → Mata rápido</li>
+                <li><strong>Support</strong> → Cura, buffa, limpa debuffs</li>
+                <li><strong>CC</strong> → Atordoa, derruba, controla</li>
+            </ul>
+            <p>Se todo mundo for DPS, o monstro fica solto e todo mundo morre. Se todo mundo for support, ninguém mata nada.</p>
+            <p>Em sistemas distribuídos, cada serviço tem um papel. API Gateway roteia, Auth valida, Database persiste, Cache acelera. Um não faz o trabalho do outro — eles se complementam.</p>
+        </section>
+
+        <section class="post-section">
+            <h2>Conclusão: Jogos São Laboratórios</h2>
+            <p>Monster Hunter me ensinou:</p>
+            <ul>
+                <li><strong>Preparação > Reação</strong> → Infraestrutura antes do incidente</li>
+                <li><strong>Padrões são previsíveis</strong> → Observabilidade paga</li>
+                <li><strong>Recuar é estratégico</strong> → Circuit breakers salvam vidas (do sistema)</li>
+                <li><strong>Templates economizam tempo</strong> → Reusabilidade é tudo</li>
+                <li><strong>Grind é necessário</strong> → Iteração contínua leva à excelência</li>
+                <li><strong>Times diversificados vencem</strong> → Cada serviço tem seu papel</li>
+            </ul>
+            <p>Da próxima vez que alguém disser que jogo é perda de tempo, mostre o Mengão Monitor. E diga: "Isso aqui é um caçador de padrões. E eu sou o Arqueiro que atira 300 vezes por segundo."</p>
+        </section>
+
+        <footer class="post-footer">
+            <div class="post-tags">
+                <span class="tag">monster-hunter</span>
+                <span class="tag">arquitetura</span>
+                <span class="tag">lições</span>
+                <span class="tag">hobby</span>
+            </div>
+            <div class="post-nav">
+                <a href="mengao-monitor-v313-automated-maintenance.html" class="nav-prev">← Mengão Monitor v3.13</a>
+                <a href="index.html" class="nav-back">Voltar pro Blog</a>
+            </div>
+        </footer>
+    </article>
+</body>
+</html>
